@@ -80,6 +80,16 @@ void Affichage(infos *personne, int indice)
 	system("cls");
 }
 
+void Sauvegarde(infos  (*personne)[])
+{
+	FILE * save = fopen("sauvegarde.csv", "w");
+	if (save == NULL)
+	{
+		printf("Echec creation du fichier de sauvegarde\n");
+		exit(EXIT_FAILURE);
+	}
+}
+
 int main()
 {
 	int cpt_ligne = 0, i = 0, cpt_virgule = 0, cpt_var = 0;
@@ -89,7 +99,7 @@ int main()
 	infos personne[6000];
 	/****************Lecture du fichier****************/
 	FILE * fichier = fopen(nom_fichier, "r");
-	if(fichier == NULL)
+	if (fichier == NULL)
 	{
 		printf("Echec ouverture fichier\n");
 		exit(EXIT_FAILURE);
@@ -148,7 +158,7 @@ int main()
 	/****************Menu****************/
 	do
 	{
-		system("cls");
+		// system("cls");  // en commentaire pour pouvoir voir les erreurs
 		printf("Bienvenue dans le menu du gestionnaire d'annuaire\n");
 		printf("	-Saisir 1 pour effectuer une recherche par indice\n");
 		printf("	-Saisir 2 pour effectuer une fonctionnalite que je n'ai pas encore code\n");
@@ -177,15 +187,22 @@ int main()
 						printf("\nErreur de saisie\n\n");
 						system("pause > nul | echo Appuyez sur une touche pour continuer...");
 					}
+					else if (nb_recherche != 0)
+					{
+						Affichage(&personne[nb_recherche-1], nb_recherche);
+					}
 				}
-				while (nb_recherche < 0 || nb_recherche > cpt_ligne);
-				Affichage(&personne[nb_recherche-1], nb_recherche);
+				while (nb_recherche != 0);
 				break;
 			
 			/****************Fonctionnalité pas encore codé****************/
 			case 2:
-			system("cls");
-				printf("Flemme de coder cette fonctionnalite\n\n");
+				system("cls");
+				printf("Creation du fichier de sauvegarde\n\n");
+
+				infos (*pt_info)[] = &personne;
+
+				Sauvegarde(pt_info);
 				system("pause > nul | echo Appuyez sur une touche pour continuer...");
 				system("cls");
 				break;
