@@ -8,7 +8,7 @@
 
 typedef struct informations
 {
-	char prenom[30], nom[30], ville[50], code_postal[10], telephone[20], email[50], metier[30];
+	char prenom[30], nom[30], ville[50], code_postal[20], telephone[20], email[50], metier[30];
 } infos;
 
 void AttributionCSV(infos * personne, int cpt_virgule, int cpt_var, char caractere);
@@ -18,6 +18,7 @@ void Sauvegarde(infos  (*personne)[], int cpt_ligne);
 void DonneeManquante(infos (*personne)[], int cpt_ligne);
 int DonneeEmpty(infos * personne);
 void EcritureFichier(FILE * fichier, infos * personne);
+void Ajout(infos (*personne)[], int * cpt_ligne);
 
 void AttributionCSV(infos * personne, int cpt_virgule, int cpt_var, char caractere)
 {
@@ -105,7 +106,7 @@ void Sauvegarde(infos  (*personne)[], int cpt_ligne)
 	printf("Sauvegarde effectue (annuaire_sauvegarde.csv)\n\n");
 }
 
-void DonneeManquante(infos (*personne)[], int cpt_ligne) // printf les 3478 personnes ? fprintf dans un txt ? dans un csv ?
+void DonneeManquante(infos (*personne)[], int cpt_ligne) // printf les 3478 personnes ? fprintf dans un csv ?
 {														  // doublon de certaines personnes ? différentes adresses pour le même ?
 	FILE * case_vide_file = fopen(chemin_annuaire_case_vide, "w");
 	if (case_vide_file == NULL)
@@ -123,7 +124,7 @@ void DonneeManquante(infos (*personne)[], int cpt_ligne) // printf les 3478 pers
 		}
 	}
 	fclose(case_vide_file);
-	printf("\nIl y a %d client ayant au moins une case vide\n", cpt_clientvide);
+	printf("\nIl y a %d client ayant au moins une case vide\n\n", cpt_clientvide);
 	printf("Tout ces clients ont ete places dans un annuaire speciale (annuaire_case_vide.csv)\n\n");
 }
 
@@ -169,6 +170,39 @@ void EcritureFichier(FILE * fichier, infos * personne)
 	fprintf(fichier, "%s,", (*personne).telephone);
 	fprintf(fichier, "%s,", (*personne).email);
 	fprintf(fichier, "%s\n", (*personne).metier);
+}
+
+void Ajout(infos (*personne)[], int * cpt_ligne)
+{
+	printf("Saisir le prenom de la personne : ");
+	fgets((*personne)[(*cpt_ligne)].prenom, sizeof((*personne)[(*cpt_ligne)].prenom), stdin);
+	fflush(stdin);
+	(*personne)[(*cpt_ligne)].prenom[strlen((*personne)[(*cpt_ligne)].prenom) - 1] = '\0';
+	printf("Saisir le nom de la personne : ");
+	fgets((*personne)[(*cpt_ligne)].nom, sizeof((*personne)[(*cpt_ligne)].nom), stdin);
+	fflush(stdin);
+	(*personne)[(*cpt_ligne)].nom[strlen((*personne)[(*cpt_ligne)].nom) - 1] = '\0';
+	printf("Saisir la ville de la personne : ");
+	fgets((*personne)[(*cpt_ligne)].ville, sizeof((*personne)[(*cpt_ligne)].ville), stdin);
+	fflush(stdin);
+	(*personne)[(*cpt_ligne)].ville[strlen((*personne)[(*cpt_ligne)].ville) - 1] = '\0';
+	printf("Saisir le code postal de la personne : ");
+	fgets((*personne)[(*cpt_ligne)].code_postal, sizeof((*personne)[(*cpt_ligne)].code_postal), stdin);
+	fflush(stdin);
+	(*personne)[(*cpt_ligne)].code_postal[strlen((*personne)[(*cpt_ligne)].code_postal) - 1] = '\0';
+	printf("Saisir le numero de telephone de la personne : ");
+	fgets((*personne)[(*cpt_ligne)].telephone, sizeof((*personne)[(*cpt_ligne)].telephone), stdin);
+	fflush(stdin);
+	(*personne)[(*cpt_ligne)].telephone[strlen((*personne)[(*cpt_ligne)].telephone) - 1] = '\0';
+	printf("Saisir le email de la personne : ");
+	fgets((*personne)[(*cpt_ligne)].email, sizeof((*personne)[(*cpt_ligne)].email), stdin);
+	fflush(stdin);
+	(*personne)[(*cpt_ligne)].email[strlen((*personne)[(*cpt_ligne)].email) - 1] = '\0';
+	printf("Saisir le metier de la personne : ");
+	fgets((*personne)[(*cpt_ligne)].metier, sizeof((*personne)[(*cpt_ligne)].metier), stdin);
+	fflush(stdin);
+	(*personne)[(*cpt_ligne)].metier[strlen((*personne)[(*cpt_ligne)].metier) - 1] = '\0';
+	(*cpt_ligne)++;
 }
 
 int main()
@@ -217,10 +251,11 @@ int main()
 		printf("\t-Saisir 1 pour effectuer une recherche par indice\n");
 		printf("\t-Saisir 2 pour effectuer une sauvegarde dans un nouveau fichier\n");
 		printf("\t-Saisir 3 pour lister les personnes avec au moins une donnee manquante\n");
-		printf("\t-Saisir 4 pour quitter\n\n");
+		printf("\t-Saisir 4 pour ajouter une personne a l'annuaire\n");
+		printf("\t-Saisir 5 pour quitter\n\n");
 		scanf("%d", &choix_menu);
 		fflush(stdin);
-		if (choix_menu >= 1 && choix_menu <= 4)
+		if (choix_menu >= 1 && choix_menu <= 5)
 		{
 			switch (choix_menu)
 			{
@@ -259,7 +294,15 @@ int main()
 				system("pause > nul | echo Appuyez sur une touche pour continuer...");
 				system("cls");
 				break;
+
+			case 4:
+				system("cls");
+				Ajout(pt_infos, &cpt_ligne);
+				system("pause > nul | echo Appuyez sur une touche pour continuer...");
+				system("cls");
+				break;
 			}
+
 		}
 		else
 		{
@@ -267,6 +310,6 @@ int main()
 			system("pause > nul | echo Appuyez sur une touche pour continuer...");
 		}
 	}
-	while (choix_menu != 4);
+	while (choix_menu != 5);
 	return 0;
 }
