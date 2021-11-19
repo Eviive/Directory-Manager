@@ -2,12 +2,18 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define nom_fichier "Annuaire/annuaire5000.csv"
+#define nom_fichier "Annuaire/annuaire_OG.csv"
+
 
 typedef struct informations
 {
 	char prenom[30], nom[30], ville[50], code_postal[10], telephone[20], email[50], metier[30];
 } infos;
+
+void AttributionCSV(infos * personne, int cpt_virgule, int cpt_var, char caractere);
+void AffichageRecherche(infos *personne, int indice);
+void Empty(char * value);
+void Sauvegarde(infos  (*personne)[], int cpt_ligne);
 
 void AttributionCSV(infos * personne, int cpt_virgule, int cpt_var, char caractere)
 {
@@ -48,75 +54,39 @@ void AffichageRecherche(infos *personne, int indice)
 	system("cls");
 	printf("Personne %d", indice);
 	printf("\nPrenom : ");
-	if (strlen((*personne).prenom) != 0)
-	{
-		printf("%s\n", (*personne).prenom);
-	}
-	else
-	{
-		printf("N/A\n");
-	}
+	Empty(&(*personne).prenom);
 	printf("Nom : ");
-	if (strlen((*personne).nom) != 0)
-	{
-		printf("%s\n", (*personne).nom);
-	}
-	else
-	{
-		printf("N/A\n");
-	}
+	Empty(&(*personne).nom);
 	printf("Ville : ");
-	if (strlen((*personne).ville) != 0)
-	{
-		printf("%s\n", (*personne).ville);
-	}
-	else
-	{
-		printf("N/A\n");
-	}
+	Empty(&(*personne).ville);
 	printf("Code postal : ");
-	if (strlen((*personne).code_postal) != 0)
-	{
-		printf("%s\n", (*personne).code_postal);
-	}
-	else
-	{
-		printf("N/A\n");
-	}
+	Empty(&(*personne).code_postal);
 	printf("Telephone : ");
-	if (strlen((*personne).telephone) != 0)
-	{
-		printf("%s\n", (*personne).telephone);
-	}
-	else
-	{
-		printf("N/A\n");
-	}
+	Empty(&(*personne).telephone);
 	printf("Email : ");
-	if (strlen((*personne).email) != 0)
-	{
-		printf("%s\n", (*personne).email);
-	}
-	else
-	{
-		printf("N/A\n");
-	}
+	Empty(&(*personne).email);
 	printf("Metier : ");
-	if (strlen((*personne).metier) != 0)
-	{
-		printf("%s\n\n", (*personne).metier);
-	}
-	else
-	{
-		printf("N/A\n\n");
-	}
+	Empty(&(*personne).metier);
+	printf("\n");
 	system("pause > nul | echo Appuyez sur une touche pour continuer...");
 	system("cls");
 }
 
+void Empty(char * value)
+{
+	if (strlen(value) != 0 )
+	{
+		printf("%s\n", value);
+	}
+	else
+	{
+		printf("N/A\n");
+	}
+}
+
 void Sauvegarde(infos  (*personne)[], int cpt_ligne)
 {
-	FILE * save_file = fopen("sauvegarde.csv", "w");
+	FILE * save_file = fopen("Annuaire/sauvegarde.csv", "w");
 	if (save_file == NULL)
 	{
 		printf("Echec creation du fichier de sauvegarde\n");
@@ -133,6 +103,7 @@ void Sauvegarde(infos  (*personne)[], int cpt_ligne)
 		fprintf(save_file, "%s\n", (*personne)[i].metier);
 	}
 	fclose(save_file);
+	printf("Sauvegarde effectue\n\n");
 }
 
 int main()
@@ -175,19 +146,14 @@ int main()
 	/****************Menu****************/
 	do
 	{
-		system("cls");  // en commentaire pour pouvoir voir les erreurs
+		// system("cls");  // en commentaire pour pouvoir voir les erreurs
 		printf("Bienvenue dans le menu du gestionnaire d'annuaire\n");
-		printf("	-Saisir 1 pour effectuer une recherche par indice\n");
-		printf("	-Saisir 2 pour effectuer une sauvegarde dans un nouveau fichier\n");
-		printf("	-Saisir 3 pour quitter\n\n");
+		printf("\t-Saisir 1 pour effectuer une recherche par indice\n");
+		printf("\t-Saisir 2 pour effectuer une sauvegarde dans un nouveau fichier\n");
+		printf("\t-Saisir 3 pour quitter\n\n");
 		scanf("%d", &choix_menu);
 		fflush(stdin);
-		if (choix_menu < 1 || choix_menu > 3)
-		{
-			printf("\nErreur de saisie\n\n");
-			system("pause > nul | echo Appuyez sur une touche pour continuer...");
-		}
-		else
+		if (choix_menu >= 1 && choix_menu <= 3)
 		{
 			switch (choix_menu)
 			{
@@ -199,14 +165,14 @@ int main()
 					printf("Saisir le numero de la personne a rechercher, il y a %d personnes rensignees (0 pour quitter) : ", cpt_ligne);
 					scanf("%d", &nb_recherche);
 					fflush(stdin);
-					if (nb_recherche < 0 || nb_recherche > cpt_ligne)
+					if (nb_recherche > 0 && nb_recherche <= cpt_ligne)
 					{
-						printf("\nErreur de saisie\n\n");
-						system("pause > nul | echo Appuyez sur une touche pour continuer...");
+						AffichageRecherche(&personne[nb_recherche-1], nb_recherche);
 					}
 					else if (nb_recherche != 0)
 					{
-						AffichageRecherche(&personne[nb_recherche-1], nb_recherche);
+						printf("\nErreur de saisie\n\n");
+						system("pause > nul | echo Appuyez sur une touche pour continuer...");
 					}
 				}
 				while (nb_recherche != 0);
@@ -222,6 +188,11 @@ int main()
 				system("cls");
 				break;
 			}
+		}
+		else
+		{
+			printf("\nErreur de saisie\n\n");
+			system("pause > nul | echo Appuyez sur une touche pour continuer...");
 		}
 	}
 	while (choix_menu != 3);
