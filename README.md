@@ -1,4 +1,6 @@
 # Gestionnaire-Annuaire
+BUT Info - Semestre 1 - SAE C
+
 Il s’agit de construire une application de gestion d’un annuaire numérique pour une organisation qui possède un ensemble de données sur ces clients (Prénom, nom, adresse, numéro de téléphone, adresse mél, profession). Ces données sont stockées dans un fichier au format texte csv avec éventuellement des champs manquants. L’application doit être capable de lire et modifier ce fichier. En outre, elle doit offrir des fonctionnalités pour une consultation structurée et lisible des données. Parmi ces fonctionnalités, l’organisation souhaite retrouver :
 - L’ajout de nouveaux clients
 
