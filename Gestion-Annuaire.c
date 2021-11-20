@@ -8,72 +8,117 @@
 
 typedef struct informations
 {
-	char prenom[30], nom[30], ville[50], code_postal[6], telephone[15], email[50], metier[30];
+	char prenom[50], nom[50], ville[50], code_postal[6], telephone[15], email[50], metier[50];
 } infos;
 
-void AttributionCSV(infos * personne, int cpt_virgule, int cpt_var, char caractere);
+/****************Prototype de fonction****************/
+char * ChoixColonne(infos * personne, int value);
+void Ouverture(infos (*personne)[], int * cpt_ligne);
 void AffichageRecherche(infos *personne, int indice);
 void AffichageEmpty(char * value);
-void Sauvegarde(infos  (*personne)[], int cpt_ligne);
+void Ajout(infos * personne, int * cpt_ligne);
+void Modif(infos *personne, int indice);
+void SaisiInfo(char * value, int size);
+void EcritureFichier(FILE * fichier, infos * personne);
 void DonneeManquante(infos (*personne)[], int cpt_ligne);
 int DonneeEmpty(infos * personne);
-void EcritureFichier(FILE * fichier, infos * personne);
-void Ajout(infos (*personne)[], int * cpt_ligne);
-void SaisiInfo(char * value, int size);
-void Modif(infos *personne, int indice);
+void Sauvegarde(infos  (*personne)[], int cpt_ligne);
 
-void AttributionCSV(infos * personne, int cpt_virgule, int cpt_var, char caractere)
+char * ChoixColonne(infos * personne, int value)
 {
-	switch(cpt_virgule)
+	// fonction (&(*personne)[entre 0 et 6], colonne)
+	// return (*personne).colonne;
+
+	// fonction()[]=...
+    switch (value)
+    {
+    case 0:
+        return (*personne).prenom;
+    
+    case 1:
+        return (*personne).nom;
+
+    case 2:
+        return (*personne).ville;
+
+    case 3:
+        return (*personne).code_postal;
+
+    case 4:
+        return (*personne).telephone;
+
+    case 5:
+        return (*personne).email;
+
+    case 6:
+        return (*personne).metier;
+
+	default:
+		printf("Erreur switch");
+    }
+}
+
+void Ouverture(infos (*personne)[], int * cpt_ligne)
+{
+	char ligne[300];
+	int cpt_char = 0, cpt_virgule = 0, cpt_var = 0;
+
+	/****************Lecture du fichier****************/
+	FILE * annuaire_file = fopen(chemin_annuaire, "r");
+	if (annuaire_file == NULL)
 	{
-	case 0:
-		(*personne).prenom[cpt_var] = caractere;
-		break;
-
-	case 1:
-		(*personne).nom[cpt_var] = caractere;
-		break;
-	
-	case 2:
-		(*personne).ville[cpt_var] = caractere;
-		break;
-
-	case 3:
-		(*personne).code_postal[cpt_var] = caractere;
-		break;
-	
-	case 4:
-		(*personne).telephone[cpt_var] = caractere;
-		break;
-	
-	case 5:
-		(*personne).email[cpt_var] = caractere;
-		break;
-	
-	case 6:
-		(*personne).metier[cpt_var] = caractere;
-		break;
+		printf("Echec ouverture fichier\n");
+		exit(EXIT_FAILURE);
 	}
+	/****************Assignation de toutes les cellules à des variables****************/
+	while (fgets(ligne, sizeof(ligne), annuaire_file) != NULL)
+	{
+		while (ligne[cpt_char] != '\0')
+		{
+			if (ligne[cpt_char] == ',' || ligne[cpt_char] == '\n')
+			{
+				ChoixColonne(&(*personne)[(*cpt_ligne)], cpt_virgule)[cpt_char] = '\0';
+				cpt_virgule++;
+				cpt_var = 0;
+			}
+			else
+			{
+				ChoixColonne(&(*personne)[(*cpt_ligne)], cpt_virgule)[cpt_var] = ligne[cpt_char];
+				cpt_var++;
+			}
+			cpt_char++;
+		}
+		cpt_char = 0;
+		cpt_virgule = 0;
+		(*cpt_ligne)++;
+	}
+	fclose(annuaire_file);
 }
 
 void AffichageRecherche(infos *personne, int indice) // créer un affichage réduit si jamais je doit afficher plusieurs clients
 {
-	system("cls");
 	printf("Personne %d", indice);
 	printf("\nPrenom : ");
-	AffichageEmpty((*personne).prenom);
+	AffichageEmpty(ChoixColonne(&(*personne), 0));
+
 	printf("Nom : ");
-	AffichageEmpty((*personne).nom);
+	AffichageEmpty(ChoixColonne(&(*personne), 1));
+
 	printf("Ville : ");
-	AffichageEmpty((*personne).ville);
+	AffichageEmpty(ChoixColonne(&(*personne), 2));
+
 	printf("Code postal : ");
-	AffichageEmpty((*personne).code_postal);
+	AffichageEmpty(ChoixColonne(&(*personne), 3));
+
 	printf("Telephone : ");
-	AffichageEmpty((*personne).telephone);
+	AffichageEmpty(ChoixColonne(&(*personne), 4));
+
 	printf("Email : ");
-	AffichageEmpty((*personne).email);
+	AffichageEmpty(ChoixColonne(&(*personne), 5));
+
 	printf("Metier : ");
-	AffichageEmpty((*personne).metier);
+	AffichageEmpty(ChoixColonne(&(*personne), 6));
+
 	printf("\n");
 	system("pause > nul | echo Appuyez sur une touche pour continuer...");
 	system("cls");
@@ -91,21 +136,77 @@ void AffichageEmpty(char * value)
 	}
 }
 
-void Sauvegarde(infos  (*personne)[], int cpt_ligne)
+void Ajout(infos * personne, int * cpt_ligne)
 {
-	printf("Creation du fichier de sauvegarde\n\n");
-	FILE * save_file = fopen(chemin_annuaire_sauvegarde, "w");
-	if (save_file == NULL)
+	do
 	{
-		printf("Echec creation du fichier de sauvegarde\n");
-		exit(EXIT_FAILURE);
+		system("cls");
+		int size = sizeof((*personne).nom);
+
+		printf("Saisir le prenom : ");
+		SaisiInfo(ChoixColonne(&(*personne), 0), size);
+		
+		printf("Saisir le nom : ");
+		SaisiInfo(ChoixColonne(&(*personne), 1), size);
+
+		printf("Saisir la ville : ");
+		SaisiInfo(ChoixColonne(&(*personne), 2), size);
+
+		printf("Saisir le code postal : ");
+		size = sizeof((*personne).code_postal);
+		SaisiInfo(ChoixColonne(&(*personne), 3), size);
+
+		printf("Saisir le numero de telephone : ");
+		size = sizeof((*personne).telephone);
+		SaisiInfo(ChoixColonne(&(*personne), 4), size);
+
+		printf("Saisir le email : ");
+		SaisiInfo(ChoixColonne(&(*personne), 5), size);
+
+		printf("Saisir le metier : ");
+		SaisiInfo(ChoixColonne(&(*personne), 6), size);
 	}
-	for (int i = 0; i <= cpt_ligne; i++)
+	while (strlen((*personne).prenom) == 0
+		&& strlen((*personne).nom) == 0
+		&& strlen((*personne).ville) == 0
+		&& strlen((*personne).code_postal) == 0
+		&& strlen((*personne).telephone) == 0
+		&& strlen((*personne).email) == 0
+		&& strlen((*personne).metier) == 0
+	);
+	// Faire les différents cas
+	
+	(*cpt_ligne)++;
+}
+
+void Modif(infos *personne, int indice)
+{
+	system("cls");
+	printf("Modif\n\n");
+	system("pause > nul | echo Appuyez sur une touche pour continuer...");
+	system("cls");
+}
+
+void SaisiInfo(char * value, int size)
+{
+	fgets(value, size, stdin);
+	fflush(stdin);
+	for(int i = 0; i < strlen(value); i++ )
 	{
-		EcritureFichier(save_file, &((*personne)[i]));
+    	if(value[i] == '\n')
+		{
+			value[i] = '\0';
+		}
 	}
-	fclose(save_file);
-	printf("Sauvegarde effectue (annuaire_sauvegarde.csv)\n\n");
+}
+
+void EcritureFichier(FILE * annuaire, infos * personne)
+{
+	for (int i = 0; i <= 5; i++)
+	{
+		fprintf(annuaire, "%s,", ChoixColonne(&(*personne), i));
+	}
+	fprintf(annuaire, "%s\n", ChoixColonne(&(*personne), 6));
 }
 
 void DonneeManquante(infos (*personne)[], int cpt_ligne) // printf les 3478 personnes ? fprintf dans un csv ?
@@ -132,148 +233,41 @@ void DonneeManquante(infos (*personne)[], int cpt_ligne) // printf les 3478 pers
 
 int DonneeEmpty(infos * personne)
 {
-	if (strlen((*personne).prenom) == 0)
+	for (int i = 0; i <= 6; i++)
 	{
-		return 1;
-	}
-	if (strlen((*personne).nom) == 0)
-	{
-		return 1;
-	}
-	if (strlen((*personne).ville) == 0)
-	{
-		return 1;
-	}
-	if (strlen((*personne).code_postal) == 0)
-	{
-		return 1;
-	}
-	if (strlen((*personne).telephone) == 0)
-	{
-		return 1;
-	}
-	if (strlen((*personne).email) == 0)
-	{
-		return 1;
-	}
-	if (strlen((*personne).metier) == 0)
-	{
-		return 1;
+		if (strlen(ChoixColonne(&(*personne), i)) == 0)
+		{
+			return 1;
+		}
 	}
 	return 0;
 }
 
-void EcritureFichier(FILE * annuaire, infos * personne)
+void Sauvegarde(infos  (*personne)[], int cpt_ligne)
 {
-	fprintf(annuaire, "%s,", (*personne).prenom);
-	fprintf(annuaire, "%s,", (*personne).nom);
-	fprintf(annuaire, "%s,", (*personne).ville);
-	fprintf(annuaire, "%s,", (*personne).code_postal);
-	fprintf(annuaire, "%s,", (*personne).telephone);
-	fprintf(annuaire, "%s,", (*personne).email);
-	fprintf(annuaire, "%s\n", (*personne).metier);
-}
-
-void Ajout(infos (*personne)[], int * cpt_ligne)
-{
-	do
+	printf("Creation du fichier de sauvegarde\n\n");
+	FILE * save_file = fopen(chemin_annuaire_sauvegarde, "w");
+	if (save_file == NULL)
 	{
-		system("cls");
-
-		printf("Saisir le prenom de la personne : ");
-		SaisiInfo((*personne)[(*cpt_ligne)].prenom, sizeof((*personne)[(*cpt_ligne)].prenom));
-
-		printf("Saisir le nom de la personne : ");
-		SaisiInfo((*personne)[(*cpt_ligne)].nom, sizeof((*personne)[(*cpt_ligne)].nom));
-
-		printf("Saisir la ville de la personne : ");
-		SaisiInfo((*personne)[(*cpt_ligne)].ville, sizeof((*personne)[(*cpt_ligne)].ville));
-
-		printf("Saisir le code postal de la personne : ");
-		SaisiInfo((*personne)[(*cpt_ligne)].code_postal, sizeof((*personne)[(*cpt_ligne)].code_postal));
-
-		printf("Saisir le numero de telephone de la personne : ");
-		SaisiInfo((*personne)[(*cpt_ligne)].telephone, sizeof((*personne)[(*cpt_ligne)].telephone));
-
-		printf("Saisir le email de la personne : ");
-		SaisiInfo((*personne)[(*cpt_ligne)].email, sizeof((*personne)[(*cpt_ligne)].email));
-
-		printf("Saisir le metier de la personne : ");
-		SaisiInfo((*personne)[(*cpt_ligne)].metier, sizeof((*personne)[(*cpt_ligne)].metier));
+		printf("Echec creation du fichier de sauvegarde\n");
+		exit(EXIT_FAILURE);
 	}
-	while (strlen((*personne)[(*cpt_ligne)].prenom) == 0
-		&& strlen((*personne)[(*cpt_ligne)].nom) == 0
-		&& strlen((*personne)[(*cpt_ligne)].ville) == 0
-		&& strlen((*personne)[(*cpt_ligne)].code_postal) == 0
-		&& strlen((*personne)[(*cpt_ligne)].telephone) == 0
-		&& strlen((*personne)[(*cpt_ligne)].email) == 0
-		&& strlen((*personne)[(*cpt_ligne)].metier) == 0
-	);
-	// Faire les différents cas
-	// Enlever les parenthèses autour des pointeurs ?
-	
-	(*cpt_ligne)++;
-}
-
-void SaisiInfo(char * value, int size)
-{
-	fgets(value, size, stdin);
-	fflush(stdin);
-	for(int i = 0; i < strlen(value); i++ )
+	for (int i = 0; i <= cpt_ligne; i++)
 	{
-    	if(value[i] == '\n')
-		{
-			value[i] = '\0';
-		}
+		EcritureFichier(save_file, &((*personne)[i]));
 	}
-}
-
-void Modif(infos *personne, int indice)
-{
-	system("cls");
-	printf("Modif\n\n");
-	system("pause > nul | echo Appuyez sur une touche pour continuer...");
-	system("cls");
+	fclose(save_file);
+	printf("Sauvegarde effectue (annuaire_sauvegarde.csv)\n\n");
 }
 
 int main()
 {
-	char ligne[300];
 	infos personne[6000];
 	infos (*pt_infos)[] = &personne;
-	int cpt_ligne = 0, cpt_char = 0, cpt_virgule = 0, cpt_var = 0;
+	int cpt_ligne = 0;
 	int choix_menu;
 	int nb_recherche, nb_modif;
-	/****************Lecture du fichier****************/
-	FILE * annuaire_file = fopen(chemin_annuaire, "r");
-	if (annuaire_file == NULL)
-	{
-		printf("Echec ouverture fichier\n");
-		exit(EXIT_FAILURE);
-	}
-	/****************Assignation de toutes les cellules à des variables****************/
-	while (fgets(ligne, sizeof(ligne), annuaire_file) != NULL)
-	{
-		while (ligne[cpt_char] != '\0')
-		{
-			if (ligne[cpt_char] == ',' || ligne[cpt_char] == '\n')
-			{
-				AttributionCSV(&personne[cpt_ligne], cpt_virgule, cpt_var, '\0');
-				cpt_virgule++;
-				cpt_var = 0;
-			}
-			else
-			{
-				AttributionCSV(&personne[cpt_ligne], cpt_virgule, cpt_var, ligne[cpt_char]);
-				cpt_var++;
-			}
-			cpt_char++;
-		}
-		cpt_char = 0;
-		cpt_virgule = 0;
-		cpt_ligne++;
-	}
-	fclose(annuaire_file);
+	Ouverture(pt_infos, &cpt_ligne);
 	/****************Menu****************/
 	do
 	{
@@ -331,7 +325,7 @@ int main()
 			/****************Ajout d'une personne****************/
 			case 4:
 				system("cls");
-				Ajout(pt_infos, &cpt_ligne);
+				Ajout(&personne[cpt_ligne], &cpt_ligne);
 				printf("\n");
 				system("pause > nul | echo Appuyez sur une touche pour continuer...");
 				system("cls");
@@ -357,8 +351,14 @@ int main()
 				}
 				while (nb_modif != 0);
 				break;
-			}
 
+			case 6:
+				break;
+			
+			default:
+				printf("Erreur switch");
+				break;
+			}
 		}
 		else
 		{
