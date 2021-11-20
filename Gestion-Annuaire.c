@@ -8,8 +8,28 @@
 
 typedef struct informations
 {
-	char prenom[50], nom[50], ville[50], code_postal[6], telephone[15], email[50], metier[50];
+	char prenom[70], nom[70], ville[70], code_postal[6], telephone[15], email[70], metier[70];
 } infos;
+
+void Clear()
+{
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+}
+
+void Pause()
+{
+    #ifdef _WIN32
+        system("pause > nul | echo Appuyez sur une touche pour continuer...");
+    #elif defined __unix__
+		system("read -n1 -r -p 'Appuyez sur une touche pour continuer...'");
+	#else
+        system("");
+    #endif
+}
 
 /****************Prototype de fonction****************/
 char * ChoixColonne(infos * personne, int value);
@@ -97,26 +117,26 @@ void Ouverture(infos (*personne)[], int * cpt_ligne)
 
 void AffichageRecherche(infos *personne, int indice) // créer un affichage réduit si jamais je doit afficher plusieurs clients
 {
-	printf("Personne %d", indice);
-	printf("\nPrenom : ");
+	printf("\nPersonne %d\n", indice);
+	printf("Prenom       : ");
 	AffichageEmpty(ChoixColonne(&(*personne), 0));
 
-	printf("Nom : ");
+	printf("Nom          : ");
 	AffichageEmpty(ChoixColonne(&(*personne), 1));
 
-	printf("Ville : ");
+	printf("Ville        : ");
 	AffichageEmpty(ChoixColonne(&(*personne), 2));
 
-	printf("Code postal : ");
+	printf("Code postal  : ");
 	AffichageEmpty(ChoixColonne(&(*personne), 3));
 
-	printf("Telephone : ");
+	printf("Telephone    : ");
 	AffichageEmpty(ChoixColonne(&(*personne), 4));
 
-	printf("Email : ");
+	printf("Email        : ");
 	AffichageEmpty(ChoixColonne(&(*personne), 5));
 
-	printf("Metier : ");
+	printf("Metier       : ");
 	AffichageEmpty(ChoixColonne(&(*personne), 6));
 
 	printf("\n");
@@ -202,11 +222,12 @@ void SaisiInfo(char * value, int size)
 
 void EcritureFichier(FILE * annuaire, infos * personne)
 {
-	for (int i = 0; i <= 5; i++)
+	int i = 0;
+	for (i; i <= 5; i++)
 	{
 		fprintf(annuaire, "%s,", ChoixColonne(&(*personne), i));
 	}
-	fprintf(annuaire, "%s\n", ChoixColonne(&(*personne), 6));
+	fprintf(annuaire, "%s\n", ChoixColonne(&(*personne), i + 1));
 }
 
 void DonneeManquante(infos (*personne)[], int cpt_ligne) // printf les 3478 personnes ? fprintf dans un csv ?
@@ -262,11 +283,12 @@ void Sauvegarde(infos  (*personne)[], int cpt_ligne)
 
 int main()
 {
-	infos personne[6000];
+	infos personne[5200];
 	infos (*pt_infos)[] = &personne;
 	int cpt_ligne = 0;
 	int choix_menu;
 	int nb_recherche, nb_modif;
+	/****************Lecture du csv, rempli le tableau de structure****************/
 	Ouverture(pt_infos, &cpt_ligne);
 	/****************Menu****************/
 	do
