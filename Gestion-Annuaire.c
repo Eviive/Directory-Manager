@@ -11,27 +11,9 @@ typedef struct informations
 	char prenom[70], nom[70], ville[70], code_postal[6], telephone[15], email[70], metier[70];
 } infos;
 
-void Clear()
-{
-    #ifdef _WIN32
-        system("cls");
-    #else
-        system("clear");
-    #endif
-}
-
-void Pause()
-{
-    #ifdef _WIN32
-        system("pause > nul | echo Appuyez sur une touche pour continuer...");
-    #elif defined __unix__
-		system("read -n1 -r -p 'Appuyez sur une touche pour continuer...'");
-	#else
-        system("");
-    #endif
-}
-
 /****************Prototype de fonction****************/
+void Clear();
+void Pause();
 char * ChoixColonne(infos * personne, int value);
 void Ouverture(infos (*personne)[], int * cpt_ligne);
 void AffichageRecherche(infos *personne, int indice);
@@ -43,6 +25,24 @@ void EcritureFichier(FILE * fichier, infos * personne);
 void DonneeManquante(infos (*personne)[], int cpt_ligne);
 int DonneeEmpty(infos * personne);
 void Sauvegarde(infos  (*personne)[], int cpt_ligne);
+
+void Clear()
+{
+    #ifdef _WIN32
+        system("cls");
+    #elif defined __unix__
+        system("clear");
+    #endif
+}
+
+void Pause()
+{
+    #ifdef _WIN32
+        system("pause > nul | echo Appuyez sur une touche pour continuer...");
+    #elif defined __unix__
+		system("read -n1 -r -p 'Appuyez sur une touche pour continuer...'");
+    #endif
+}
 
 char * ChoixColonne(infos * personne, int value)
 {
@@ -140,8 +140,8 @@ void AffichageRecherche(infos *personne, int indice) // créer un affichage réd
 	AffichageEmpty(ChoixColonne(&(*personne), 6));
 
 	printf("\n");
-	system("pause > nul | echo Appuyez sur une touche pour continuer...");
-	system("cls");
+	Pause();
+	Clear();
 }
 
 void AffichageEmpty(char * value)
@@ -160,29 +160,20 @@ void Ajout(infos * personne, int * cpt_ligne)
 {
 	do
 	{
-		system("cls");
+		Clear();
 		int size = sizeof((*personne).nom);
-
 		printf("Saisir le prenom : ");
 		SaisiInfo(ChoixColonne(&(*personne), 0), size);
-		
 		printf("Saisir le nom : ");
 		SaisiInfo(ChoixColonne(&(*personne), 1), size);
-
 		printf("Saisir la ville : ");
 		SaisiInfo(ChoixColonne(&(*personne), 2), size);
-
 		printf("Saisir le code postal : ");
-		size = sizeof((*personne).code_postal);
-		SaisiInfo(ChoixColonne(&(*personne), 3), size);
-
+		SaisiInfo(ChoixColonne(&(*personne), 3), sizeof((*personne).code_postal));
 		printf("Saisir le numero de telephone : ");
-		size = sizeof((*personne).telephone);
-		SaisiInfo(ChoixColonne(&(*personne), 4), size);
-
+		SaisiInfo(ChoixColonne(&(*personne), 4), sizeof((*personne).telephone));
 		printf("Saisir le email : ");
 		SaisiInfo(ChoixColonne(&(*personne), 5), size);
-
 		printf("Saisir le metier : ");
 		SaisiInfo(ChoixColonne(&(*personne), 6), size);
 	}
@@ -194,17 +185,15 @@ void Ajout(infos * personne, int * cpt_ligne)
 		&& strlen((*personne).email) == 0
 		&& strlen((*personne).metier) == 0
 	);
-	// Faire les différents cas
-	
 	(*cpt_ligne)++;
 }
 
 void Modif(infos *personne, int indice)
 {
-	system("cls");
+	Clear();
 	printf("Modif\n\n");
-	system("pause > nul | echo Appuyez sur une touche pour continuer...");
-	system("cls");
+	Pause();
+	Clear();
 }
 
 void SaisiInfo(char * value, int size)
@@ -227,7 +216,7 @@ void EcritureFichier(FILE * annuaire, infos * personne)
 	{
 		fprintf(annuaire, "%s,", ChoixColonne(&(*personne), i));
 	}
-	fprintf(annuaire, "%s\n", ChoixColonne(&(*personne), i + 1));
+	fprintf(annuaire, "%s\n", ChoixColonne(&(*personne), i));
 }
 
 void DonneeManquante(infos (*personne)[], int cpt_ligne) // printf les 3478 personnes ? fprintf dans un csv ?
@@ -248,7 +237,7 @@ void DonneeManquante(infos (*personne)[], int cpt_ligne) // printf les 3478 pers
 		}
 	}
 	fclose(case_vide_file);
-	printf("\nIl y a %d client ayant au moins une case vide\n\n", cpt_clientvide);
+	printf("Il y a %d client ayant au moins une case vide\n\n", cpt_clientvide);
 	printf("Tout ces clients ont ete places dans un annuaire speciale (annuaire_case_vide.csv)\n\n");
 }
 
@@ -293,13 +282,13 @@ int main()
 	/****************Menu****************/
 	do
 	{
-		// system("cls");  // en commentaire pour pouvoir voir les erreurs
+		Clear();  // en commentaire pour pouvoir voir les erreurs
 		printf("Bienvenue dans le menu du gestionnaire d'annuaire\n");
 		printf("\t-Saisir 1 pour effectuer une recherche par indice\n");
-		printf("\t-Saisir 2 pour effectuer une sauvegarde dans un nouveau fichier\n");
-		printf("\t-Saisir 3 pour lister les personnes avec au moins une donnee manquante\n");
-		printf("\t-Saisir 4 pour ajouter une personne a l'annuaire\n");
-		printf("\t-Saisir 5 pour modifier une personne dans l'annuaire\n");
+		printf("\t-Saisir 2 pour ajouter une personne a l'annuaire\n");
+		printf("\t-Saisir 3 pour modifier une personne dans l'annuaire\n");
+		printf("\t-Saisir 4 pour lister les personnes avec au moins une donnee manquante\n");
+		printf("\t-Saisir 5 pour effectuer une sauvegarde dans un nouveau fichier\n");
 		printf("\t-Saisir 6 pour quitter\n\n");
 		scanf("%d", &choix_menu);
 		fflush(stdin);
@@ -311,7 +300,7 @@ int main()
 			case 1:
 				do
 				{
-					system("cls");
+					Clear();
 					printf("Saisir le numero de la personne a rechercher, il y a %d personnes rensignees (0 pour quitter) : ", cpt_ligne);
 					scanf("%d", &nb_recherche);
 					fflush(stdin);
@@ -322,42 +311,26 @@ int main()
 					else if (nb_recherche != 0)
 					{
 						printf("\nErreur de saisie\n\n");
-						system("pause > nul | echo Appuyez sur une touche pour continuer...");
+						Pause();
 					}
 				}
 				while (nb_recherche != 0);
 				break;
-			
-			/****************Sauvegarde dans un nouveau fichier****************/
-			case 2:
-				system("cls");
-				Sauvegarde(pt_infos, cpt_ligne - 1);
-				system("pause > nul | echo Appuyez sur une touche pour continuer...");
-				system("cls");
-				break;
-
-			/****************Client avec au moins une case vide****************/
-			case 3:
-				system("cls");
-				DonneeManquante(pt_infos, cpt_ligne - 1);
-				system("pause > nul | echo Appuyez sur une touche pour continuer...");
-				system("cls");
-				break;
 
 			/****************Ajout d'une personne****************/
-			case 4:
-				system("cls");
+			case 2:
+				Clear();
 				Ajout(&personne[cpt_ligne], &cpt_ligne);
 				printf("\n");
-				system("pause > nul | echo Appuyez sur une touche pour continuer...");
-				system("cls");
+				Pause();
+				Clear();
 				break;
-			
+
 			/****************Modification d'une personne****************/
-			case 5:
+			case 3:
 				do
 				{
-					system("cls");
+					Clear();
 					printf("Saisir le numero de la personne a modifier, il y a %d personnes rensignees (0 pour quitter) : ", cpt_ligne);
 					scanf("%d", &nb_modif);
 					fflush(stdin);
@@ -368,15 +341,31 @@ int main()
 					else if (nb_modif != 0)
 					{
 						printf("\nErreur de saisie\n\n");
-						system("pause > nul | echo Appuyez sur une touche pour continuer...");
+						Pause();
 					}
 				}
 				while (nb_modif != 0);
 				break;
 
+			/****************Client avec au moins une case vide****************/
+			case 4:
+				Clear();
+				DonneeManquante(pt_infos, cpt_ligne - 1);
+				Pause();
+				Clear();
+				break;
+
+			/****************Sauvegarde dans un nouveau fichier****************/
+			case 5:
+				Clear();
+				Sauvegarde(pt_infos, cpt_ligne - 1);
+				Pause();
+				Clear();
+				break;
+
 			case 6:
 				break;
-			
+
 			default:
 				printf("Erreur switch");
 				break;
@@ -385,7 +374,7 @@ int main()
 		else
 		{
 			printf("\nErreur de saisie\n\n");
-			system("pause > nul | echo Appuyez sur une touche pour continuer...");
+			Pause();
 		}
 	}
 	while (choix_menu != 6);
