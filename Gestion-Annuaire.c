@@ -6,7 +6,6 @@
 
 #define chemin_annuaire "Annuaire/annuaire_test.csv"
 #define chemin_annuaire_sauvegarde "Annuaire/annuaire_sauvegarde.csv"
-#define chemin_annuaire_case_vide "Annuaire/annuaire_case_vide.csv"
 
 #define taille 70
 #define taille_code_postal 6
