@@ -1,3 +1,5 @@
+// Précondition doit être très courte car une fonction fait quelque chose de très précis
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -6,9 +8,13 @@
 #define chemin_annuaire_sauvegarde "Annuaire/annuaire_sauvegarde.csv"
 #define chemin_annuaire_case_vide "Annuaire/annuaire_case_vide.csv"
 
+#define taille 70
+#define taille_code_postal 6
+#define taille_telephone 15
+
 typedef struct informations
 {
-	char prenom[70], nom[70], ville[70], code_postal[6], telephone[15], email[70], metier[70];
+	char prenom[taille], nom[taille], ville[taille], code_postal[taille_code_postal], telephone[taille_telephone], email[taille], metier[taille];
 } infos;
 
 /****************Prototype de fonction****************/
@@ -46,10 +52,6 @@ void Pause()
 
 char * ChoixColonne(infos * personne, int value)
 {
-	// fonction (&(*personne)[entre 0 et 6], colonne)
-	// return (*personne).colonne;
-
-	// fonction()[]=...
     switch (value)
     {
     case 0:
@@ -140,8 +142,6 @@ void AffichageRecherche(infos *personne, int indice) // créer un affichage réd
 	AffichageEmpty(ChoixColonne(&(*personne), 6));
 
 	printf("\n");
-	Pause();
-	Clear();
 }
 
 void AffichageEmpty(char * value)
@@ -190,10 +190,39 @@ void Ajout(infos * personne, int * cpt_ligne)
 
 void Modif(infos *personne, int indice)
 {
-	Clear();
-	printf("Modif\n\n");
-	Pause();
-	Clear();
+	int nb_col;
+	do
+	{
+		Clear();
+		printf("(1: Prenom, 2: Nom, 3: Ville Code, 4: postal, 5: Telephone, 6: Email, 7: Metier)\n\nSaisissez le numero de la colonne a modifier (0 pour quitter): ");
+		scanf("%d", &nb_col);
+		fflush(stdin);
+		if (nb_col >= 1 && nb_col <= 7)
+		{
+			printf("\nSaisir la nouvelle valeur : ");
+			if (nb_col == 4)  // faire une fonction qui renvoie la taille si j'en ai besoin
+			{
+				SaisiInfo(ChoixColonne(&(*personne), nb_col-1), taille_code_postal);
+			}
+			else if (nb_col == 5)
+			{
+				SaisiInfo(ChoixColonne(&(*personne), nb_col-1), taille_telephone);
+			}
+			else
+			{
+				SaisiInfo(ChoixColonne(&(*personne), nb_col-1), taille);
+			}
+			printf("\n");
+			Pause();
+			Clear();
+		}
+		else if (nb_col != 0)
+		{
+			printf("\nErreur de saisie\n\n");
+			Pause();
+		}
+	}
+	while (nb_col != 0);
 }
 
 void SaisiInfo(char * value, int size)
@@ -219,26 +248,18 @@ void EcritureFichier(FILE * annuaire, infos * personne)
 	fprintf(annuaire, "%s\n", ChoixColonne(&(*personne), i));
 }
 
-void DonneeManquante(infos (*personne)[], int cpt_ligne) // printf les 3478 personnes ? fprintf dans un csv ?
-{														  // doublon de certaines personnes ? différentes adresses pour le même ?
-	FILE * case_vide_file = fopen(chemin_annuaire_case_vide, "w");
-	if (case_vide_file == NULL)
-	{
-		printf("Echec creation du fichier des clients avec au moins une donnee manquante\n");
-		exit(EXIT_FAILURE);
-	}
+void DonneeManquante(infos (*personne)[], int cpt_ligne)
+{
 	int indice = 0, cpt_clientvide = 0;
 	for (indice = 0; indice <= cpt_ligne; indice++)
 	{
 		if (DonneeEmpty(&((*personne)[indice])) == 1)
 		{
 			cpt_clientvide++;
-			EcritureFichier(case_vide_file, &((*personne)[indice]));
+			AffichageRecherche(&(*personne)[indice], indice);
 		}
 	}
-	fclose(case_vide_file);
-	printf("Il y a %d client ayant au moins une case vide\n\n", cpt_clientvide);
-	printf("Tout ces clients ont ete places dans un annuaire speciale (annuaire_case_vide.csv)\n\n");
+	printf("Il y a %d clients ayant au moins une case vide\n\n", cpt_clientvide);
 }
 
 int DonneeEmpty(infos * personne)
@@ -307,6 +328,7 @@ int main()
 					if (nb_recherche > 0 && nb_recherche <= cpt_ligne)
 					{
 						AffichageRecherche(&personne[nb_recherche-1], nb_recherche);
+						Pause();
 					}
 					else if (nb_recherche != 0)
 					{
