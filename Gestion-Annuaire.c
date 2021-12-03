@@ -1,4 +1,8 @@
-// Précondition doit être très courte car une fonction fait quelque chose de très précis
+// Spécification formelle : Précondition doit être très courte car une fonction fait quelque chose de très précis
+// Interdire les ',' dans les input
+// Enlever les pointeurs dans les fonctions où je n'ai pas besoin de modifier les valeurs
+// Type char pour les fonctions qui return 0 ou 1
+// fflush avec la méthode du TP6 si jamais ça marche pas sur un certain OS
 
 #include <stdio.h>
 #include <string.h>
@@ -20,16 +24,16 @@ typedef struct informations
 void Clear();
 void Pause();
 char * ChoixColonne(infos * personne, int value);
-void Ouverture(infos (*personne)[], int * cpt_ligne);
-void AffichageRecherche(infos *personne, int indice);
-void AffichageEmpty(char * value);
+void Ouverture(infos personne[5200], int * cpt_ligne);
+void AffichageComplet(infos personne, int indice);
+void AffichageUnique(char * value);
 void Ajout(infos * personne, int * cpt_ligne);
-void Modif(infos *personne, int indice);
+void Modif(infos * personne, int indice);
 void SaisiInfo(char * value, int size);
-void EcritureFichier(FILE * fichier, infos * personne);
-void DonneeManquante(infos (*personne)[], int cpt_ligne);
-int DonneeEmpty(infos * personne);
-void Sauvegarde(infos  (*personne)[], int cpt_ligne);
+void EcritureFichier(FILE * annuaire, infos personne);
+void DonneeManquante(infos personne[5200], int cpt_ligne);
+int DonneeEmpty(infos personne);
+void Sauvegarde(infos personne[5200], int cpt_ligne);
 
 void Clear()
 {
@@ -79,7 +83,7 @@ char * ChoixColonne(infos * personne, int value)
     }
 }
 
-void Ouverture(infos (*personne)[], int * cpt_ligne)
+void Ouverture(infos personne[5200], int * cpt_ligne)
 {
 	char ligne[300];
 	int cpt_char = 0, cpt_virgule = 0, cpt_var = 0;
@@ -98,13 +102,13 @@ void Ouverture(infos (*personne)[], int * cpt_ligne)
 		{
 			if (ligne[cpt_char] == ',' || ligne[cpt_char] == '\n')
 			{
-				ChoixColonne(&(*personne)[(*cpt_ligne)], cpt_virgule)[cpt_char] = '\0';
+				ChoixColonne(&personne[(*cpt_ligne)], cpt_virgule)[cpt_char] = '\0';
 				cpt_virgule++;
 				cpt_var = 0;
 			}
 			else
 			{
-				ChoixColonne(&(*personne)[(*cpt_ligne)], cpt_virgule)[cpt_var] = ligne[cpt_char];
+				ChoixColonne(&personne[(*cpt_ligne)], cpt_virgule)[cpt_var] = ligne[cpt_char];
 				cpt_var++;
 			}
 			cpt_char++;
@@ -116,34 +120,44 @@ void Ouverture(infos (*personne)[], int * cpt_ligne)
 	fclose(annuaire_file);
 }
 
-void AffichageRecherche(infos *personne, int indice) // créer un affichage réduit si jamais je doit afficher plusieurs clients
+void AffichageComplet(infos personne, int indice) // créer un affichage réduit si jamais je doit afficher plusieurs clients
 {
-	printf("\nPersonne %d\n", indice);
-	printf("Prenom       : ");
-	AffichageEmpty(ChoixColonne(&(*personne), 0));
+	int i, taille_aff;
+	for (i = 0; i <= 5; i++)
+	{
+		switch (i)
+		{
+		case 0:
+			taille_aff = 20;
+			break;
+		
+		case 1:
+			taille_aff = 20;
+			break;
 
-	printf("Nom          : ");
-	AffichageEmpty(ChoixColonne(&(*personne), 1));
+		case 2:
+			taille_aff = 15;
+			break;
 
-	printf("Ville        : ");
-	AffichageEmpty(ChoixColonne(&(*personne), 2));
+		case 3:
+			taille_aff = taille_code_postal - 1;
+			break;
 
-	printf("Code postal  : ");
-	AffichageEmpty(ChoixColonne(&(*personne), 3));
+		case 4:
+			taille_aff = taille_telephone - 1;
+			break;
 
-	printf("Telephone    : ");
-	AffichageEmpty(ChoixColonne(&(*personne), 4));
-
-	printf("Email        : ");
-	AffichageEmpty(ChoixColonne(&(*personne), 5));
-
-	printf("Metier       : ");
-	AffichageEmpty(ChoixColonne(&(*personne), 6));
-
-	printf("\n");
+		case 5:
+			taille_aff = 30;
+			break;
+		}
+		printf("%*.*s | ", -taille_aff, taille_aff, ChoixColonne(&personne, i));
+	}
+	taille_aff = 20;
+	printf("%*.*s\n", -taille_aff, taille_aff, ChoixColonne(&personne, i));
 }
 
-void AffichageEmpty(char * value)
+void AffichageUnique(char * value)
 {
 	if (strlen(value) != 0 )
 	{
@@ -187,17 +201,20 @@ void Ajout(infos * personne, int * cpt_ligne)
 	(*cpt_ligne)++;
 }
 
-void Modif(infos *personne, int indice)
+void Modif(infos * personne, int indice)
 {
 	int nb_col;
 	do
 	{
 		Clear();
-		printf("(1: Prenom, 2: Nom, 3: Ville Code, 4: postal, 5: Telephone, 6: Email, 7: Metier)\n\nSaisissez le numero de la colonne a modifier (0 pour quitter): ");
+		printf("1: Prenom, 2: Nom, 3: Ville Code, 4: postal, 5: Telephone, 6: Email, 7: Metier\n\nSaisissez le numero de la colonne a modifier (0 pour quitter): ");
 		scanf("%d", &nb_col);
 		fflush(stdin);
 		if (nb_col >= 1 && nb_col <= 7)
 		{
+			printf("\nPersonne : %d\n", indice);
+			printf("Valeur actuelle : ");
+			AffichageUnique(ChoixColonne(&(*personne), nb_col-1));
 			printf("\nSaisir la nouvelle valeur : ");
 			if (nb_col == 4)  // faire une fonction qui renvoie la taille si j'en ai besoin
 			{
@@ -237,35 +254,35 @@ void SaisiInfo(char * value, int size)
 	}
 }
 
-void EcritureFichier(FILE * annuaire, infos * personne)
+void EcritureFichier(FILE * annuaire, infos personne)
 {
 	int i = 0;
 	for (i; i <= 5; i++)
 	{
-		fprintf(annuaire, "%s,", ChoixColonne(&(*personne), i));
+		fprintf(annuaire, "%s,", ChoixColonne(&personne, i));
 	}
-	fprintf(annuaire, "%s\n", ChoixColonne(&(*personne), i));
+	fprintf(annuaire, "%s\n", ChoixColonne(&personne, i));
 }
 
-void DonneeManquante(infos (*personne)[], int cpt_ligne)
+void DonneeManquante(infos personne[5200], int cpt_ligne)
 {
 	int indice = 0, cpt_clientvide = 0;
 	for (indice = 0; indice <= cpt_ligne; indice++)
 	{
-		if (DonneeEmpty(&((*personne)[indice])) == 1)
+		if (DonneeEmpty(personne[indice]) == 1)
 		{
 			cpt_clientvide++;
-			AffichageRecherche(&(*personne)[indice], indice);
+			AffichageComplet(personne[indice], indice);
 		}
 	}
-	printf("Il y a %d clients ayant au moins une case vide\n\n", cpt_clientvide);
+	printf("\nIl y a %d clients ayant au moins une case vide\n\n", cpt_clientvide);
 }
 
-int DonneeEmpty(infos * personne)
+int DonneeEmpty(infos personne)
 {
 	for (int i = 0; i <= 6; i++)
 	{
-		if (strlen(ChoixColonne(&(*personne), i)) == 0)
+		if (strlen(ChoixColonne(&personne, i)) == 0)
 		{
 			return 1;
 		}
@@ -273,7 +290,7 @@ int DonneeEmpty(infos * personne)
 	return 0;
 }
 
-void Sauvegarde(infos  (*personne)[], int cpt_ligne)
+void Sauvegarde(infos personne[5200], int cpt_ligne)
 {
 	printf("Creation du fichier de sauvegarde\n\n");
 	FILE * save_file = fopen(chemin_annuaire_sauvegarde, "w");
@@ -284,7 +301,7 @@ void Sauvegarde(infos  (*personne)[], int cpt_ligne)
 	}
 	for (int i = 0; i <= cpt_ligne; i++)
 	{
-		EcritureFichier(save_file, &((*personne)[i]));
+		EcritureFichier(save_file, personne[i]);
 	}
 	fclose(save_file);
 	printf("Sauvegarde effectue (annuaire_sauvegarde.csv)\n\n");
@@ -293,16 +310,15 @@ void Sauvegarde(infos  (*personne)[], int cpt_ligne)
 int main()
 {
 	infos personne[5200];
-	infos (*pt_infos)[] = &personne;
 	int cpt_ligne = 0;
 	int choix_menu;
 	int nb_recherche, nb_modif;
 	/****************Lecture du csv, rempli le tableau de structure****************/
-	Ouverture(pt_infos, &cpt_ligne);
+	Ouverture(personne, &cpt_ligne);
 	/****************Menu****************/
 	do
 	{
-		Clear();  // en commentaire pour pouvoir voir les erreurs
+		// Clear();  // en commentaire pour pouvoir voir les erreurs
 		printf("Bienvenue dans le menu du gestionnaire d'annuaire\n");
 		printf("\t-Saisir 1 pour effectuer une recherche par indice\n");
 		printf("\t-Saisir 2 pour ajouter une personne a l'annuaire\n");
@@ -326,7 +342,9 @@ int main()
 					fflush(stdin);
 					if (nb_recherche > 0 && nb_recherche <= cpt_ligne)
 					{
-						AffichageRecherche(&personne[nb_recherche-1], nb_recherche);
+						printf("\n");
+						AffichageComplet(personne[nb_recherche-1], nb_recherche);
+						printf("\n");
 						Pause();
 					}
 					else if (nb_recherche != 0)
@@ -371,7 +389,7 @@ int main()
 			/****************Client avec au moins une case vide****************/
 			case 4:
 				Clear();
-				DonneeManquante(pt_infos, cpt_ligne - 1);
+				DonneeManquante(personne, cpt_ligne - 1);
 				Pause();
 				Clear();
 				break;
@@ -379,7 +397,7 @@ int main()
 			/****************Sauvegarde dans un nouveau fichier****************/
 			case 5:
 				Clear();
-				Sauvegarde(pt_infos, cpt_ligne - 1);
+				Sauvegarde(personne, cpt_ligne - 1);
 				Pause();
 				Clear();
 				break;
