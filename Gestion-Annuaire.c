@@ -34,53 +34,55 @@ void EcritureFichier(FILE * annuaire, infos personne);
 void DonneeManquante(infos personne[5200], int cpt_ligne);
 int DonneeEmpty(infos personne);
 void Sauvegarde(infos personne[5200], int cpt_ligne);
+void TriInsertion(infos personne[5200], int colonne);
+void TriSelection(infos (*personne)[], int colonne, int cpt_ligne);
 
 void Clear()
 {
-    #ifdef _WIN32
-        system("cls");
-    #elif defined __unix__
-        system("clear");
-    #endif
+	#ifdef _WIN32
+		system("cls");
+	#elif defined __unix__
+		system("clear");
+	#endif
 }
 
 void Pause()
 {
-    #ifdef _WIN32
-        system("pause > nul | echo Appuyez sur une touche pour continuer...");
-    #elif defined __unix__
+	#ifdef _WIN32
+		system("pause > nul | echo Appuyez sur une touche pour continuer...");
+	#elif defined __unix__
 		system("read -n1 -r -p 'Appuyez sur une touche pour continuer...'");
-    #endif
+	#endif
 }
 
 char * ChoixColonne(infos * personne, int value)
 {
-    switch (value)
-    {
-    case 0:
-        return (*personne).prenom;
-    
-    case 1:
-        return (*personne).nom;
+	switch (value)
+	{
+	case 0:
+		return (*personne).prenom;
+	
+	case 1:
+		return (*personne).nom;
 
-    case 2:
-        return (*personne).ville;
+	case 2:
+		return (*personne).ville;
 
-    case 3:
-        return (*personne).code_postal;
+	case 3:
+		return (*personne).code_postal;
 
-    case 4:
-        return (*personne).telephone;
+	case 4:
+		return (*personne).telephone;
 
-    case 5:
-        return (*personne).email;
+	case 5:
+		return (*personne).email;
 
-    case 6:
-        return (*personne).metier;
+	case 6:
+		return (*personne).metier;
 
 	default:
 		printf("Erreur switch");
-    }
+	}
 }
 
 void Ouverture(infos personne[5200], int * cpt_ligne)
@@ -123,6 +125,7 @@ void Ouverture(infos personne[5200], int * cpt_ligne)
 void AffichageComplet(infos personne, int indice) // créer un affichage réduit si jamais je doit afficher plusieurs clients
 {
 	int i, taille_aff;
+	printf("%*d | ", 4, indice);
 	for (i = 0; i <= 5; i++)
 	{
 		switch (i)
@@ -247,7 +250,7 @@ void SaisiInfo(char * value, int size)
 	fflush(stdin);
 	for(int i = 0; i < strlen(value); i++ )
 	{
-    	if(value[i] == '\n')
+		if(value[i] == '\n')
 		{
 			value[i] = '\0';
 		}
@@ -307,11 +310,71 @@ void Sauvegarde(infos personne[5200], int cpt_ligne)
 	printf("Sauvegarde effectue (annuaire_sauvegarde.csv)\n\n");
 }
 
+void TriInsertion(infos personne[5200], int colonne)
+{
+	int i = 0, j;
+	char petit[taille];
+	while (i < 5200)
+	{
+		int x = 0;
+		for (x; ChoixColonne(&personne[i], colonne)[x] != '\0'; x++)
+		{
+			petit[x] = ChoixColonne(&personne[i], colonne)[x];
+			// printf("%d %c\n", x, petit[x]);
+		}
+		petit[x] = '\0';
+		// printf("%d %c\n", x, petit[x]);
+		// Pause();
+		j = i - 1;
+		while (j >= 0 && petit < ChoixColonne(&personne[j], colonne))
+		{
+			int y = 0;
+			for (y; ChoixColonne(&personne[j], colonne)[y] != '\0'; y++)
+			{
+				ChoixColonne(&personne[j + 1], colonne)[y] = ChoixColonne(&personne[j], colonne)[y];
+			}
+			ChoixColonne(&personne[j + 1], colonne)[y] = '\0';
+			j--;
+		}
+		int z = 0;
+		for (z; petit[z] != '\0'; z++)
+		{
+			ChoixColonne(&personne[j + 1], colonne)[z] = petit[z];
+		}
+		ChoixColonne(&personne[j + 1], colonne)[z] = '\0';
+		i++;
+	}
+}
+
+void TriSelection(infos (*personne)[], int colonne, int cpt_ligne)
+{
+	int i = 0, j, ipp;
+	infos petit;
+	while (i < cpt_ligne - 1)
+	{
+		ipp = i;
+		petit = (*personne)[ipp];
+		j = i + 1;
+		while (j < cpt_ligne)
+		{
+			if (strcasecmp(petit.nom, (*personne)[j].nom) > 0)
+			{
+				ipp = j;
+				petit = (*personne)[ipp];
+			}
+			j++;
+		}
+		(*personne)[ipp] = (*personne)[i];
+		(*personne)[i] = petit;
+		i++;
+	}
+}
+
 int main()
 {
 	infos personne[5200];
 	int cpt_ligne = 0;
-	int choix_menu;
+	int choix_menu, colonne;
 	int nb_recherche, nb_modif;
 	/****************Lecture du csv, rempli le tableau de structure****************/
 	Ouverture(personne, &cpt_ligne);
@@ -325,10 +388,11 @@ int main()
 		printf("\t-Saisir 3 pour modifier une personne dans l'annuaire\n");
 		printf("\t-Saisir 4 pour lister les personnes avec au moins une donnee manquante\n");
 		printf("\t-Saisir 5 pour effectuer une sauvegarde dans un nouveau fichier\n");
-		printf("\t-Saisir 6 pour quitter\n\n");
+		printf("\t-Saisir 6 pour effectuer un tri par insertion\n");
+		printf("\t-Saisir 7 pour quitter\n\n");
 		scanf("%d", &choix_menu);
 		fflush(stdin);
-		if (choix_menu >= 1 && choix_menu <= 6)
+		if (choix_menu >= 1 && choix_menu <= 7)
 		{
 			switch (choix_menu)
 			{
@@ -403,6 +467,28 @@ int main()
 				break;
 
 			case 6:
+				do
+				{
+					Clear();
+					printf("1: Prenom, 2: Nom, 3: Ville Code, 4: postal, 5: Telephone, 6: Email, 7: Metier\n\nSaisir le numero de la colonne selon laquelle l'annuaire va etre trie : ");
+					scanf("%d", &colonne);
+					fflush(stdin);
+					if (colonne >= 1 && colonne <= 7)
+					{
+						// TriInsertion(personne, colonne-1);
+						TriSelection(&personne, colonne - 1, cpt_ligne);
+						printf("\nLe tri par insertion a ete effectue\n\n");
+					}
+					else
+					{
+						printf("\nErreur de saisie\n\n");
+					}
+					Pause();
+				}
+				while (colonne < 1 || colonne > 7);
+				break;
+
+			case 7:
 				break;
 
 			default:
@@ -416,6 +502,6 @@ int main()
 			Pause();
 		}
 	}
-	while (choix_menu != 6);
+	while (choix_menu != 7);
 	return 0;
 }
