@@ -347,7 +347,7 @@ void TriInsertion(infos personne[5200], int colonne)
 }
 
 void TriSelection(infos (*personne)[], int colonne, int cpt_ligne)
-{
+{ // variable tmp pour contrer le mofifiable value ?
 	int i = 0, j, ipp;
 	infos petit;
 	while (i < cpt_ligne - 1)
@@ -357,7 +357,7 @@ void TriSelection(infos (*personne)[], int colonne, int cpt_ligne)
 		j = i + 1;
 		while (j < cpt_ligne)
 		{
-			if (strcasecmp(petit.nom, (*personne)[j].nom) > 0)
+			if (strcasecmp(ChoixColonne(&petit, colonne), ChoixColonne(&(*personne)[j], colonne)) > 0)
 			{
 				ipp = j;
 				petit = (*personne)[ipp];
@@ -470,14 +470,14 @@ int main()
 				do
 				{
 					Clear();
-					printf("1: Prenom, 2: Nom, 3: Ville Code, 4: postal, 5: Telephone, 6: Email, 7: Metier\n\nSaisir le numero de la colonne selon laquelle l'annuaire va etre trie : ");
+					printf("1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n\nSaisir le numero de la colonne selon laquelle l'annuaire va etre trie : ");
 					scanf("%d", &colonne);
 					fflush(stdin);
 					if (colonne >= 1 && colonne <= 7)
 					{
 						// TriInsertion(personne, colonne-1);
 						TriSelection(&personne, colonne - 1, cpt_ligne);
-						printf("\nLe tri par insertion a ete effectue\n\n");
+						printf("\nLe tri par selection a ete effectue\n\n");
 					}
 					else
 					{
