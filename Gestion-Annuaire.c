@@ -1,8 +1,12 @@
 // Spécification formelle : Précondition doit être très courte car une fonction fait quelque chose de très précis
 // Interdire les ',' dans les input
 // Enlever les pointeurs dans les fonctions où je n'ai pas besoin de modifier les valeurs
-// Type char pour les fonctions qui return 0 ou 1
 // fflush avec la méthode du TP6 si jamais ça marche pas sur un certain OS
+
+// La recherche et l'affichage des données sur un client à partir de son nom, son prénom et son numéro de téléphone ou son adresse mél (une occurrence car ces couples sont uniques => recherche dichotomique => trié ?)
+// Nom Prénom Tel / Nom Prénom Mail
+// OU
+// Nom Prénom Tel / Mail
 
 #include <stdio.h>
 #include <string.h>
@@ -20,7 +24,7 @@ typedef struct informations
 	char prenom[taille], nom[taille], ville[taille], code_postal[taille_code_postal], telephone[taille_telephone], email[taille], metier[taille];
 } infos;
 
-/****************Prototype de fonction****************/
+/***************Prototype de fonction***************/
 void Clear();
 void Pause();
 char * ChoixColonne(infos * personne, int value);
@@ -32,7 +36,7 @@ void Modif(infos * personne, int indice);
 void SaisiInfo(char * value, int size);
 void EcritureFichier(FILE * annuaire, infos personne);
 void DonneeManquante(infos personne[5200], int cpt_ligne);
-int DonneeEmpty(infos personne);
+char DonneeEmpty(infos personne);
 void Sauvegarde(infos personne[5200], int cpt_ligne);
 void TriInsertion(infos personne[5200], int colonne);
 void TriSelection(infos (*personne)[], int colonne, int cpt_ligne);
@@ -193,13 +197,14 @@ void Ajout(infos * personne, int * cpt_ligne)
 		printf("Saisir le metier : ");
 		SaisiInfo(ChoixColonne(&(*personne), 6), size);
 	}
-	while (strlen((*personne).prenom) == 0
-		&& strlen((*personne).nom) == 0
-		&& strlen((*personne).ville) == 0
-		&& strlen((*personne).code_postal) == 0
-		&& strlen((*personne).telephone) == 0
-		&& strlen((*personne).email) == 0
-		&& strlen((*personne).metier) == 0
+	while ((strlen((*personne).prenom) == 0
+		 && strlen((*personne).nom) == 0
+		 && strlen((*personne).ville) == 0
+		 && strlen((*personne).code_postal) == 0
+		 && strlen((*personne).telephone) == 0
+		 && strlen((*personne).email) == 0
+		 && strlen((*personne).metier) == 0)
+		 || (strlen((*personne).telephone) == 0)
 	);
 	(*cpt_ligne)++;
 }
@@ -233,7 +238,6 @@ void Modif(infos * personne, int indice)
 			}
 			printf("\n");
 			Pause();
-			Clear();
 		}
 		else if (nb_col != 0)
 		{
@@ -281,7 +285,7 @@ void DonneeManquante(infos personne[5200], int cpt_ligne)
 	printf("\nIl y a %d clients ayant au moins une case vide\n\n", cpt_clientvide);
 }
 
-int DonneeEmpty(infos personne)
+char DonneeEmpty(infos personne)
 {
 	for (int i = 0; i <= 6; i++)
 	{
@@ -347,7 +351,7 @@ void TriInsertion(infos personne[5200], int colonne)
 }
 
 void TriSelection(infos (*personne)[], int colonne, int cpt_ligne)
-{ // variable tmp pour contrer le mofifiable value ?
+{
 	int i = 0, j, ipp;
 	infos petit;
 	while (i < cpt_ligne - 1)
@@ -376,9 +380,9 @@ int main()
 	int cpt_ligne = 0;
 	int choix_menu, colonne;
 	int nb_recherche, nb_modif;
-	/****************Lecture du csv, rempli le tableau de structure****************/
+	/***************Lecture du csv, rempli le tableau de structure***************/
 	Ouverture(personne, &cpt_ligne);
-	/****************Menu****************/
+	/***************Menu***************/
 	do
 	{
 		// Clear();  // en commentaire pour pouvoir voir les erreurs
@@ -396,7 +400,7 @@ int main()
 		{
 			switch (choix_menu)
 			{
-			/****************Recherche par indice****************/
+			/***************Recherche par indice***************/
 			case 1:
 				do
 				{
@@ -420,7 +424,7 @@ int main()
 				while (nb_recherche != 0);
 				break;
 
-			/****************Ajout d'une personne****************/
+			/***************Ajout d'une personne***************/
 			case 2:
 				Clear();
 				Ajout(&personne[cpt_ligne], &cpt_ligne);
@@ -429,7 +433,7 @@ int main()
 				Clear();
 				break;
 
-			/****************Modification d'une personne****************/
+			/***************Modification d'une personne***************/
 			case 3:
 				do
 				{
@@ -450,7 +454,7 @@ int main()
 				while (nb_modif != 0);
 				break;
 
-			/****************Client avec au moins une case vide****************/
+			/***************Client avec au moins une case vide***************/
 			case 4:
 				Clear();
 				DonneeManquante(personne, cpt_ligne - 1);
@@ -458,7 +462,7 @@ int main()
 				Clear();
 				break;
 
-			/****************Sauvegarde dans un nouveau fichier****************/
+			/***************Sauvegarde dans un nouveau fichier***************/
 			case 5:
 				Clear();
 				Sauvegarde(personne, cpt_ligne - 1);
@@ -466,6 +470,7 @@ int main()
 				Clear();
 				break;
 
+			/***************Tri par sélection***************/
 			case 6:
 				do
 				{
