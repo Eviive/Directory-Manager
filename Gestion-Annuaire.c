@@ -28,18 +28,19 @@ typedef struct informations
 void Clear();
 void Pause();
 char * ChoixColonne(infos * personne, int value);
-void Ouverture(infos personne[5200], int * cpt_ligne);
+void Ouverture(infos personne[5200], int indice_personne[5200], int * cpt_ligne);
 void AffichageComplet(infos personne, int indice);
 void AffichageUnique(char * value);
-void Ajout(infos * personne, int * cpt_ligne);
+void Ajout(infos * personne, int indice_personne[5200], int * cpt_ligne);
 void Modif(infos * personne, int indice);
 void SaisiInfo(char * value, int size);
 void EcritureFichier(FILE * annuaire, infos personne);
-void DonneeManquante(infos personne[5200], int cpt_ligne);
+void DonneeManquante(infos personne[5200], int indice_personne[5200], int cpt_ligne);
 char DonneeEmpty(infos personne);
-void Sauvegarde(infos personne[5200], int cpt_ligne);
-void TriInsertion(infos personne[5200], int colonne);
-void TriSelection(infos (*personne)[], int colonne, int cpt_ligne);
+void Sauvegarde(infos personne[5200], int indice_personne[5200], int cpt_ligne);
+void TriSelection(infos personne[5200], int colonne, int cpt_ligne);
+void TriInsertion(infos personne[5200], int colonne, int cpt_ligne);
+void TriInsertionIndirect(infos personne[5200], int indice_personne[5200], int colonne, int cpt_ligne);
 
 void Clear()
 {
@@ -89,7 +90,7 @@ char * ChoixColonne(infos * personne, int value)
 	}
 }
 
-void Ouverture(infos personne[5200], int * cpt_ligne)
+void Ouverture(infos personne[5200], int indice_personne[5200], int * cpt_ligne)
 {
 	char ligne[300];
 	int cpt_char = 0, cpt_virgule = 0, cpt_var = 0;
@@ -119,6 +120,7 @@ void Ouverture(infos personne[5200], int * cpt_ligne)
 			}
 			cpt_char++;
 		}
+		indice_personne[(*cpt_ligne)] = (*cpt_ligne);
 		cpt_char = 0;
 		cpt_virgule = 0;
 		(*cpt_ligne)++;
@@ -126,7 +128,7 @@ void Ouverture(infos personne[5200], int * cpt_ligne)
 	fclose(annuaire_file);
 }
 
-void AffichageComplet(infos personne, int indice) // créer un affichage réduit si jamais je doit afficher plusieurs clients
+void AffichageComplet(infos personne, int indice)
 {
 	int i, taille_aff;
 	printf("%*d | ", 4, indice);
@@ -176,7 +178,7 @@ void AffichageUnique(char * value)
 	}
 }
 
-void Ajout(infos * personne, int * cpt_ligne)
+void Ajout(infos * personne, int indice_personne[5200], int * cpt_ligne)
 {
 	do
 	{
@@ -206,6 +208,7 @@ void Ajout(infos * personne, int * cpt_ligne)
 		 && strlen((*personne).metier) == 0)
 		 || (strlen((*personne).telephone) == 0)
 	);
+	indice_personne[(*cpt_ligne)] = (*cpt_ligne);
 	(*cpt_ligne)++;
 }
 
@@ -271,15 +274,15 @@ void EcritureFichier(FILE * annuaire, infos personne)
 	fprintf(annuaire, "%s\n", ChoixColonne(&personne, i));
 }
 
-void DonneeManquante(infos personne[5200], int cpt_ligne)
+void DonneeManquante(infos personne[5200], int indice_personne[5200], int cpt_ligne)
 {
 	int indice = 0, cpt_clientvide = 0;
 	for (indice = 0; indice <= cpt_ligne; indice++)
 	{
-		if (DonneeEmpty(personne[indice]) == 1)
+		if (DonneeEmpty(personne[indice_personne[indice]]) == 1)
 		{
 			cpt_clientvide++;
-			AffichageComplet(personne[indice], indice);
+			AffichageComplet(personne[indice_personne[indice]], indice);
 		}
 	}
 	printf("\nIl y a %d clients ayant au moins une case vide\n\n", cpt_clientvide);
@@ -297,7 +300,7 @@ char DonneeEmpty(infos personne)
 	return 0;
 }
 
-void Sauvegarde(infos personne[5200], int cpt_ligne)
+void Sauvegarde(infos personne[5200], int indice_personne[5200], int cpt_ligne)
 {
 	printf("Creation du fichier de sauvegarde\n\n");
 	FILE * save_file = fopen(chemin_annuaire_sauvegarde, "w");
@@ -308,68 +311,68 @@ void Sauvegarde(infos personne[5200], int cpt_ligne)
 	}
 	for (int i = 0; i <= cpt_ligne; i++)
 	{
-		EcritureFichier(save_file, personne[i]);
+		EcritureFichier(save_file, personne[indice_personne[i]]);
 	}
 	fclose(save_file);
 	printf("Sauvegarde effectue (annuaire_sauvegarde.csv)\n\n");
 }
 
-void TriInsertion(infos personne[5200], int colonne)
-{
-	int i = 0, j;
-	char petit[taille];
-	while (i < 5200)
-	{
-		int x = 0;
-		for (x; ChoixColonne(&personne[i], colonne)[x] != '\0'; x++)
-		{
-			petit[x] = ChoixColonne(&personne[i], colonne)[x];
-			// printf("%d %c\n", x, petit[x]);
-		}
-		petit[x] = '\0';
-		// printf("%d %c\n", x, petit[x]);
-		// Pause();
-		j = i - 1;
-		while (j >= 0 && petit < ChoixColonne(&personne[j], colonne))
-		{
-			int y = 0;
-			for (y; ChoixColonne(&personne[j], colonne)[y] != '\0'; y++)
-			{
-				ChoixColonne(&personne[j + 1], colonne)[y] = ChoixColonne(&personne[j], colonne)[y];
-			}
-			ChoixColonne(&personne[j + 1], colonne)[y] = '\0';
-			j--;
-		}
-		int z = 0;
-		for (z; petit[z] != '\0'; z++)
-		{
-			ChoixColonne(&personne[j + 1], colonne)[z] = petit[z];
-		}
-		ChoixColonne(&personne[j + 1], colonne)[z] = '\0';
-		i++;
-	}
-}
-
-void TriSelection(infos (*personne)[], int colonne, int cpt_ligne)
+void TriSelection(infos personne[5200], int colonne, int cpt_ligne)
 {
 	int i = 0, j, ipp;
 	infos petit;
 	while (i < cpt_ligne - 1)
 	{
 		ipp = i;
-		petit = (*personne)[ipp];
+		petit = personne[ipp];
 		j = i + 1;
 		while (j < cpt_ligne)
 		{
-			if (strcasecmp(ChoixColonne(&petit, colonne), ChoixColonne(&(*personne)[j], colonne)) > 0)
+			if (strcasecmp(ChoixColonne(&petit, colonne), ChoixColonne(&personne[j], colonne)) > 0)
 			{
 				ipp = j;
-				petit = (*personne)[ipp];
+				petit = personne[ipp];
 			}
 			j++;
 		}
-		(*personne)[ipp] = (*personne)[i];
-		(*personne)[i] = petit;
+		personne[ipp] = personne[i];
+		personne[i] = petit;
+		i++;
+	}
+}
+
+void TriInsertion(infos personne[5200], int colonne, int cpt_ligne)
+{
+	int i = 1, j;
+	infos petit;
+	while (i < cpt_ligne - 1)
+	{
+		petit = personne[i];
+		j = i - 1;
+		while (j >= 0 && strcasecmp(ChoixColonne(&personne[j], colonne), ChoixColonne(&petit, colonne)) > 0)
+		{
+			personne[j + 1] = personne[j];
+			j--;
+		}
+		personne[j + 1] = petit;
+		i++;
+	}
+}
+
+void TriInsertionIndirect(infos personne[5200], int indice_personne[5200], int colonne, int cpt_ligne)
+{
+	int i = 1, j;
+	infos petit;
+	while (i <= cpt_ligne - 1)
+	{
+		petit = personne[indice_personne[i]];
+		j = i - 1;
+		while (j >= 0 && strcasecmp(ChoixColonne(&personne[indice_personne[j]], colonne), ChoixColonne(&petit, colonne)) > 0)
+		{
+			indice_personne[j + 1] = indice_personne[j];
+			j--;
+		}
+		indice_personne[j + 1] = i;
 		i++;
 	}
 }
@@ -377,11 +380,12 @@ void TriSelection(infos (*personne)[], int colonne, int cpt_ligne)
 int main()
 {
 	infos personne[5200];
+	int indice_personne[5200];
 	int cpt_ligne = 0;
 	int choix_menu, colonne;
 	int nb_recherche, nb_modif;
 	/***************Lecture du csv, rempli le tableau de structure***************/
-	Ouverture(personne, &cpt_ligne);
+	Ouverture(personne, indice_personne, &cpt_ligne);
 	/***************Menu***************/
 	do
 	{
@@ -396,7 +400,12 @@ int main()
 		printf("\t-Saisir 7 pour quitter\n\n");
 		scanf("%d", &choix_menu);
 		fflush(stdin);
-		if (choix_menu >= 1 && choix_menu <= 7)
+		if (choix_menu < 1 || choix_menu > 7)
+		{
+			printf("\nErreur de saisie\n\n");
+			Pause();
+		}
+		else if (choix_menu >= 1 && choix_menu <= 6)
 		{
 			switch (choix_menu)
 			{
@@ -411,7 +420,7 @@ int main()
 					if (nb_recherche > 0 && nb_recherche <= cpt_ligne)
 					{
 						printf("\n");
-						AffichageComplet(personne[nb_recherche-1], nb_recherche);
+						AffichageComplet(personne[indice_personne[nb_recherche-1]], nb_recherche);
 						printf("\n");
 						Pause();
 					}
@@ -427,7 +436,7 @@ int main()
 			/***************Ajout d'une personne***************/
 			case 2:
 				Clear();
-				Ajout(&personne[cpt_ligne], &cpt_ligne);
+				Ajout(&personne[cpt_ligne], indice_personne, &cpt_ligne);
 				printf("\n");
 				Pause();
 				Clear();
@@ -443,7 +452,7 @@ int main()
 					fflush(stdin);
 					if (nb_modif > 0 && nb_modif <= cpt_ligne)
 					{
-						Modif(&personne[nb_modif-1], nb_modif);
+						Modif(&personne[indice_personne[nb_modif-1]], nb_modif);
 					}
 					else if (nb_modif != 0)
 					{
@@ -457,7 +466,7 @@ int main()
 			/***************Client avec au moins une case vide***************/
 			case 4:
 				Clear();
-				DonneeManquante(personne, cpt_ligne - 1);
+				DonneeManquante(personne, indice_personne, cpt_ligne - 1);
 				Pause();
 				Clear();
 				break;
@@ -465,12 +474,12 @@ int main()
 			/***************Sauvegarde dans un nouveau fichier***************/
 			case 5:
 				Clear();
-				Sauvegarde(personne, cpt_ligne - 1);
+				Sauvegarde(personne, indice_personne, cpt_ligne - 1);
 				Pause();
 				Clear();
 				break;
 
-			/***************Tri par sélection***************/
+			/***************Tri***************/
 			case 6:
 				do
 				{
@@ -480,8 +489,9 @@ int main()
 					fflush(stdin);
 					if (colonne >= 1 && colonne <= 7)
 					{
-						// TriInsertion(personne, colonne-1);
-						TriSelection(&personne, colonne - 1, cpt_ligne);
+						// TriSelection(personne, colonne - 1, cpt_ligne);
+						// TriInsertion(personne, colonne - 1, cpt_ligne);
+						TriInsertionIndirect(personne, indice_personne, colonne - 1, cpt_ligne);
 						printf("\nLe tri par selection a ete effectue\n\n");
 					}
 					else
@@ -493,20 +503,33 @@ int main()
 				while (colonne < 1 || colonne > 7);
 				break;
 
-			case 7:
-				break;
-
 			default:
 				printf("Erreur switch");
 				break;
 			}
 		}
-		else
-		{
-			printf("\nErreur de saisie\n\n");
-			Pause();
-		}
 	}
 	while (choix_menu != 7);
 	return 0;
 }
+
+// lister les tris existant et les références de où on les a trouvés
+// le choix peut dépendre de théorique => complexité théorique
+// 							 pratique => implémentation facile
+// il faut trouver le juste milieu
+
+// présentation succinte, afficher la complexité sans explication des calculs (dire où on l'a trouvé)
+
+// tri fusion : complexité quadratique, très efficace mais pas adapté pour les tableaux car cela nécessite de dupliquer le tableau
+// plus adapter pour les liste
+
+// lister les diff tris possible, les regrouper par classe suivant les avantages et inconvénients
+// les éliminer peu à peu
+
+// présentation courte => le principe (1 phrase), complexité théorique
+
+
+
+// 2ème rapport : 1er rapport + le programme C
+// comparaison théorique des choix
+// exécuter les deux prog et comparer les benchmarks
