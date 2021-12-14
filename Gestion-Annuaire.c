@@ -8,13 +8,18 @@
 // OU
 // Nom Prénom Tel / Mail
 
+// strncasecmp pour les filtres, même chose que strcasecmp sauf que il y a une limite
+// strstr => sous-chaines
+
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
+// #define chemin_annuaire "Annuaire/annuaire_reduit.csv"
 #define chemin_annuaire "Annuaire/annuaire_test.csv"
 #define chemin_annuaire_sauvegarde "Annuaire/annuaire_sauvegarde.csv"
 
+#define tableau 5200
 #define taille 70
 #define taille_code_postal 6
 #define taille_telephone 15
@@ -28,19 +33,21 @@ typedef struct informations
 void Clear();
 void Pause();
 char * ChoixColonne(infos * personne, int value);
-void Ouverture(infos personne[5200], int indice_personne[5200], int * cpt_ligne);
+void Ouverture(infos personne[tableau], int indice_personne[tableau], int * cpt_ligne);
 void AffichageComplet(infos personne, int indice);
 void AffichageUnique(char * value);
-void Ajout(infos * personne, int indice_personne[5200], int * cpt_ligne);
+void Ajout(infos * personne, int indice_personne[tableau], int * cpt_ligne);
 void Modif(infos * personne, int indice);
 void SaisiInfo(char * value, int size);
 void EcritureFichier(FILE * annuaire, infos personne);
-void DonneeManquante(infos personne[5200], int indice_personne[5200], int cpt_ligne);
+void DonneeManquante(infos personne[tableau], int indice_personne[tableau], int cpt_ligne);
 char DonneeEmpty(infos personne);
-void Sauvegarde(infos personne[5200], int indice_personne[5200], int cpt_ligne);
-void TriSelection(infos personne[5200], int colonne, int cpt_ligne);
-void TriInsertion(infos personne[5200], int colonne, int cpt_ligne);
-void TriInsertionIndirect(infos personne[5200], int indice_personne[5200], int colonne, int cpt_ligne);
+void Sauvegarde(infos personne[tableau], int indice_personne[tableau], int cpt_ligne);
+void TriSelection(infos personne[tableau], int indice_personne[tableau], int colonne, int cpt_ligne);
+void TriInsertion(infos personne[tableau], int indice_personne[tableau], int colonne, int cpt_ligne);
+void TriInsertionIndirect(infos personne[tableau], int indice_personne[tableau], int colonne, int cpt_ligne);
+void RechercheSequentielle(infos personne[tableau], int indice_personne[tableau], int cpt_ligne, int colonne, char value_recherche[taille]);
+void RechercheSequentielleTriee(infos personne[tableau], int indice_personne[tableau], int cpt_ligne, int colonne, char value_recherche[taille]);
 
 void Clear()
 {
@@ -90,7 +97,7 @@ char * ChoixColonne(infos * personne, int value)
 	}
 }
 
-void Ouverture(infos personne[5200], int indice_personne[5200], int * cpt_ligne)
+void Ouverture(infos personne[tableau], int indice_personne[tableau], int * cpt_ligne)
 {
 	char ligne[300];
 	int cpt_char = 0, cpt_virgule = 0, cpt_var = 0;
@@ -105,22 +112,22 @@ void Ouverture(infos personne[5200], int indice_personne[5200], int * cpt_ligne)
 	/****************Assignation de toutes les cellules à des variables****************/
 	while (fgets(ligne, sizeof(ligne), annuaire_file) != NULL)
 	{
+		indice_personne[(*cpt_ligne)] = (*cpt_ligne);
 		while (ligne[cpt_char] != '\0')
 		{
 			if (ligne[cpt_char] == ',' || ligne[cpt_char] == '\n')
 			{
-				ChoixColonne(&personne[(*cpt_ligne)], cpt_virgule)[cpt_char] = '\0';
+				ChoixColonne(&personne[indice_personne[(*cpt_ligne)]], cpt_virgule)[cpt_char] = '\0';
 				cpt_virgule++;
 				cpt_var = 0;
 			}
 			else
 			{
-				ChoixColonne(&personne[(*cpt_ligne)], cpt_virgule)[cpt_var] = ligne[cpt_char];
+				ChoixColonne(&personne[indice_personne[(*cpt_ligne)]], cpt_virgule)[cpt_var] = ligne[cpt_char];
 				cpt_var++;
 			}
 			cpt_char++;
 		}
-		indice_personne[(*cpt_ligne)] = (*cpt_ligne);
 		cpt_char = 0;
 		cpt_virgule = 0;
 		(*cpt_ligne)++;
@@ -178,26 +185,25 @@ void AffichageUnique(char * value)
 	}
 }
 
-void Ajout(infos * personne, int indice_personne[5200], int * cpt_ligne)
+void Ajout(infos * personne, int indice_personne[tableau], int * cpt_ligne)
 {
 	do
 	{
 		Clear();
-		int size = sizeof((*personne).nom);
 		printf("Saisir le prenom : ");
-		SaisiInfo(ChoixColonne(&(*personne), 0), size);
+		SaisiInfo(ChoixColonne(&(*personne), 0), taille);
 		printf("Saisir le nom : ");
-		SaisiInfo(ChoixColonne(&(*personne), 1), size);
+		SaisiInfo(ChoixColonne(&(*personne), 1), taille);
 		printf("Saisir la ville : ");
-		SaisiInfo(ChoixColonne(&(*personne), 2), size);
+		SaisiInfo(ChoixColonne(&(*personne), 2), taille);
 		printf("Saisir le code postal : ");
-		SaisiInfo(ChoixColonne(&(*personne), 3), sizeof((*personne).code_postal));
+		SaisiInfo(ChoixColonne(&(*personne), 3), taille_code_postal);
 		printf("Saisir le numero de telephone : ");
-		SaisiInfo(ChoixColonne(&(*personne), 4), sizeof((*personne).telephone));
+		SaisiInfo(ChoixColonne(&(*personne), 4), taille_telephone);
 		printf("Saisir le email : ");
-		SaisiInfo(ChoixColonne(&(*personne), 5), size);
+		SaisiInfo(ChoixColonne(&(*personne), 5), taille);
 		printf("Saisir le metier : ");
-		SaisiInfo(ChoixColonne(&(*personne), 6), size);
+		SaisiInfo(ChoixColonne(&(*personne), 6), taille);
 	}
 	while ((strlen((*personne).prenom) == 0
 		 && strlen((*personne).nom) == 0
@@ -216,7 +222,6 @@ void Ajout(infos * personne, int indice_personne[5200], int * cpt_ligne)
 void Modif(infos * personne, int indice)
 {
 	int nb_col;
-	Clear();
 	printf("1: Prenom, 2: Nom, 3: Ville Code, 4: postal, 5: Telephone, 6: Email, 7: Metier\n\nSaisissez le numero de la colonne a modifier (0 pour quitter): ");
 	scanf("%d", &nb_col);
 	fflush(stdin);
@@ -239,12 +244,10 @@ void Modif(infos * personne, int indice)
 			SaisiInfo(ChoixColonne(&(*personne), nb_col-1), taille);
 		}
 		printf("\n");
-		Pause();
 	}
 	else if (nb_col != 0)
 	{
 		printf("\nErreur de saisie\n\n");
-		Pause();
 	}
 }
 
@@ -271,7 +274,7 @@ void EcritureFichier(FILE * annuaire, infos personne)
 	fprintf(annuaire, "%s\n", ChoixColonne(&personne, i));
 }
 
-void DonneeManquante(infos personne[5200], int indice_personne[5200], int cpt_ligne)
+void DonneeManquante(infos personne[tableau], int indice_personne[tableau], int cpt_ligne)
 {
 	int indice = 0, cpt_clientvide = 0;
 	for (indice = 0; indice <= cpt_ligne; indice++)
@@ -297,7 +300,7 @@ char DonneeEmpty(infos personne)
 	return 0;
 }
 
-void Sauvegarde(infos personne[5200], int indice_personne[5200], int cpt_ligne)
+void Sauvegarde(infos personne[tableau], int indice_personne[tableau], int cpt_ligne)
 {
 	printf("Creation du fichier de sauvegarde\n\n");
 	FILE * save_file = fopen(chemin_annuaire_sauvegarde, "w");
@@ -314,49 +317,31 @@ void Sauvegarde(infos personne[5200], int indice_personne[5200], int cpt_ligne)
 	printf("Sauvegarde effectue (annuaire_sauvegarde.csv)\n\n");
 }
 
-void TriSelection(infos personne[5200], int colonne, int cpt_ligne)
+void TriSelection(infos personne[tableau], int indice_personne[tableau], int colonne, int cpt_ligne)
 {
 	int i = 0, j, ipp;
 	infos petit;
 	while (i < cpt_ligne - 1)
 	{
 		ipp = i;
-		petit = personne[ipp];
+		petit = personne[indice_personne[ipp]];
 		j = i + 1;
 		while (j < cpt_ligne)
 		{
-			if (strcasecmp(ChoixColonne(&petit, colonne), ChoixColonne(&personne[j], colonne)) > 0)
+			if (strcasecmp(ChoixColonne(&personne[indice_personne[j]], colonne), ChoixColonne(&petit, colonne)) < 0)
 			{
 				ipp = j;
-				petit = personne[ipp];
+				petit = personne[indice_personne[ipp]];
 			}
 			j++;
 		}
-		personne[ipp] = personne[i];
-		personne[i] = petit;
+		personne[indice_personne[ipp]] = personne[indice_personne[i]];
+		personne[indice_personne[i]] = petit;
 		i++;
 	}
 }
 
-void TriInsertion(infos personne[5200], int colonne, int cpt_ligne)
-{
-	int i = 1, j;
-	infos petit;
-	while (i < cpt_ligne - 1)
-	{
-		petit = personne[i];
-		j = i - 1;
-		while (j >= 0 && strcasecmp(ChoixColonne(&personne[j], colonne), ChoixColonne(&petit, colonne)) > 0)
-		{
-			personne[j + 1] = personne[j];
-			j--;
-		}
-		personne[j + 1] = petit;
-		i++;
-	}
-}
-
-void TriInsertionIndirect(infos personne[5200], int indice_personne[5200], int colonne, int cpt_ligne)
+void TriInsertion(infos personne[tableau], int indice_personne[tableau], int colonne, int cpt_ligne)
 {
 	int i = 1, j;
 	infos petit;
@@ -366,26 +351,70 @@ void TriInsertionIndirect(infos personne[5200], int indice_personne[5200], int c
 		j = i - 1;
 		while (j >= 0 && strcasecmp(ChoixColonne(&personne[indice_personne[j]], colonne), ChoixColonne(&petit, colonne)) > 0)
 		{
+			personne[indice_personne[j + 1]] = personne[indice_personne[j]];
+			j--;
+		}
+		personne[indice_personne[j + 1]] = petit;
+		i++;
+	}
+}
+
+void TriInsertionIndirect(infos personne[tableau], int indice_personne[tableau], int colonne, int cpt_ligne)
+{
+	int i = 1, j, petit;
+	while (i <= cpt_ligne - 1)
+	{
+		petit = indice_personne[i];
+		j = i - 1;
+		while (j >= 0 && strcasecmp(ChoixColonne(&personne[indice_personne[j]], colonne), ChoixColonne(&personne[petit], colonne)) > 0)
+		{
 			indice_personne[j + 1] = indice_personne[j];
 			j--;
 		}
-		indice_personne[j + 1] = i;
+		indice_personne[j + 1] = petit;
+		i++;
+	}
+}
+
+void RechercheSequentielle(infos personne[tableau], int indice_personne[tableau], int cpt_ligne, int colonne, char value_recherche[taille])
+{
+	int i = 0;
+	while (i < cpt_ligne - 1)
+	{
+		if (strcasecmp(ChoixColonne(&personne[indice_personne[i]], colonne), value_recherche) == 0)
+		{
+			AffichageComplet(personne[indice_personne[i]], i);
+		}
+		i++;
+	}
+}
+
+void RechercheSequentielleTriee(infos personne[tableau], int indice_personne[tableau], int cpt_ligne, int colonne, char value_recherche[taille])
+{
+	int i = 0;
+	while (i < cpt_ligne && strcasecmp(ChoixColonne(&personne[indice_personne[i]], colonne), value_recherche) < 0)
+	{
+		i++;
+	}
+	while (strcasecmp(ChoixColonne(&personne[indice_personne[i]], colonne), value_recherche) == 0)
+	{
+		AffichageComplet(personne[indice_personne[i]], i);
 		i++;
 	}
 }
 
 int main()
 {
-	infos personne[5200];
-	int indice_personne[5200];
+	infos personne[tableau];
+	int indice_personne[tableau];
 	int cpt_ligne = 0;
 	int choix_menu, nb_recherche, nb_modif, colonne;
+	char value_recherche[taille];
 	/***************Lecture du csv, rempli le tableau de structure***************/
 	Ouverture(personne, indice_personne, &cpt_ligne);
 	/***************Menu***************/
 	do
 	{
-		// Clear();  // en commentaire pour pouvoir voir les erreurs
 		printf("Bienvenue dans le menu du gestionnaire d'annuaire\n");
 		printf("\t-Saisir 1 pour effectuer une recherche par indice\n");
 		printf("\t-Saisir 2 pour ajouter une personne a l'annuaire\n");
@@ -393,15 +422,17 @@ int main()
 		printf("\t-Saisir 4 pour lister les personnes avec au moins une donnee manquante\n");
 		printf("\t-Saisir 5 pour effectuer une sauvegarde dans un nouveau fichier\n");
 		printf("\t-Saisir 6 pour effectuer un tri par insertion indirect\n");
-		printf("\t-Saisir 7 pour quitter\n\n");
+		printf("\t-Saisir 7 pour effectuer une recherche sequentielle triee\n");
+		printf("\t-Saisir 8 pour quitter\n\n");
 		scanf("%d", &choix_menu);
 		fflush(stdin);
-		if (choix_menu < 1 || choix_menu > 7)
+		if (choix_menu < 1 || choix_menu > 8)
 		{
 			printf("\nErreur de saisie\n\n");
 			Pause();
+			Clear();
 		}
-		else if (choix_menu >= 1 && choix_menu <= 6)
+		else if (choix_menu >= 1 && choix_menu <= 7)
 		{
 			switch (choix_menu)
 			{
@@ -416,13 +447,13 @@ int main()
 					printf("\n");
 					AffichageComplet(personne[indice_personne[nb_recherche-1]], nb_recherche);
 					printf("\n");
-					Pause();
 				}
 				else if (nb_recherche != 0)
 				{
 					printf("\nErreur de saisie\n\n");
-					Pause();
 				}
+				Pause();
+				Clear();
 				break;
 
 			/***************Ajout d'une personne***************/
@@ -442,13 +473,15 @@ int main()
 				fflush(stdin);
 				if (nb_modif > 0 && nb_modif <= cpt_ligne)
 				{
+					Clear();
 					Modif(&personne[indice_personne[nb_modif-1]], nb_modif);
 				}
 				else if (nb_modif != 0)
 				{
 					printf("\nErreur de saisie\n\n");
-					Pause();
 				}
+				Pause();
+				Clear();
 				break;
 
 			/***************Client avec au moins une case vide***************/
@@ -475,8 +508,8 @@ int main()
 				fflush(stdin);
 				if (colonne >= 1 && colonne <= 7)
 				{
-					// TriSelection(personne, colonne - 1, cpt_ligne);
-					// TriInsertion(personne, colonne - 1, cpt_ligne);
+					// TriSelection(personne, indice_personne, colonne - 1, cpt_ligne);
+					// TriInsertion(personne, indice_personne, colonne - 1, cpt_ligne);
 					TriInsertionIndirect(personne, indice_personne, colonne - 1, cpt_ligne);
 					printf("\nLe tri par insertion indirect a ete effectue\n\n");
 				}
@@ -485,6 +518,30 @@ int main()
 					printf("\nErreur de saisie\n\n");
 				}
 				Pause();
+				Clear();
+				break;
+			
+			case 7:
+				Clear();
+				printf("1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n(0 pour quitter)\n\nSaisir le numero de la colonne a rechercher : ");
+				scanf("%d", &colonne);
+				fflush(stdin);
+				printf("\nSaisir la valeur a rechercher : ");
+				scanf("%s", &value_recherche);
+				fflush(stdin);
+				printf("\n");
+				if (colonne >= 1 && colonne <= 7)
+				{
+					// RechercheSequentielle(personne, indice_personne, cpt_ligne, colonne - 1, value_recherche);
+					RechercheSequentielleTriee(personne, indice_personne, cpt_ligne, colonne - 1, value_recherche);
+					printf("\nLa recherche sequentielle triee a ete effectue\n\n");
+				}
+				else if (colonne != 0)
+				{
+					printf("\nErreur de saisie\n\n");
+				}
+				Pause();
+				Clear();
 				break;
 
 			default:
@@ -493,7 +550,7 @@ int main()
 			}
 		}
 	}
-	while (choix_menu != 7);
+	while (choix_menu != 8);
 	return 0;
 }
 
