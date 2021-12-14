@@ -207,6 +207,7 @@ void Ajout(infos * personne, int indice_personne[5200], int * cpt_ligne)
 		 && strlen((*personne).email) == 0
 		 && strlen((*personne).metier) == 0)
 		 || (strlen((*personne).telephone) == 0)
+		 || (strlen((*personne).email) == 0)
 	);
 	indice_personne[(*cpt_ligne)] = (*cpt_ligne);
 	(*cpt_ligne)++;
@@ -215,40 +216,36 @@ void Ajout(infos * personne, int indice_personne[5200], int * cpt_ligne)
 void Modif(infos * personne, int indice)
 {
 	int nb_col;
-	do
+	Clear();
+	printf("1: Prenom, 2: Nom, 3: Ville Code, 4: postal, 5: Telephone, 6: Email, 7: Metier\n\nSaisissez le numero de la colonne a modifier (0 pour quitter): ");
+	scanf("%d", &nb_col);
+	fflush(stdin);
+	if (nb_col >= 1 && nb_col <= 7)
 	{
-		Clear();
-		printf("1: Prenom, 2: Nom, 3: Ville Code, 4: postal, 5: Telephone, 6: Email, 7: Metier\n\nSaisissez le numero de la colonne a modifier (0 pour quitter): ");
-		scanf("%d", &nb_col);
-		fflush(stdin);
-		if (nb_col >= 1 && nb_col <= 7)
+		printf("\nPersonne : %d\n", indice);
+		printf("Valeur actuelle : ");
+		AffichageUnique(ChoixColonne(&(*personne), nb_col-1));
+		printf("\nSaisir la nouvelle valeur : ");
+		if (nb_col == 4)
 		{
-			printf("\nPersonne : %d\n", indice);
-			printf("Valeur actuelle : ");
-			AffichageUnique(ChoixColonne(&(*personne), nb_col-1));
-			printf("\nSaisir la nouvelle valeur : ");
-			if (nb_col == 4)  // faire une fonction qui renvoie la taille si j'en ai besoin
-			{
-				SaisiInfo(ChoixColonne(&(*personne), nb_col-1), taille_code_postal);
-			}
-			else if (nb_col == 5)
-			{
-				SaisiInfo(ChoixColonne(&(*personne), nb_col-1), taille_telephone);
-			}
-			else
-			{
-				SaisiInfo(ChoixColonne(&(*personne), nb_col-1), taille);
-			}
-			printf("\n");
-			Pause();
+			SaisiInfo(ChoixColonne(&(*personne), nb_col-1), taille_code_postal);
 		}
-		else if (nb_col != 0)
+		else if (nb_col == 5)
 		{
-			printf("\nErreur de saisie\n\n");
-			Pause();
+			SaisiInfo(ChoixColonne(&(*personne), nb_col-1), taille_telephone);
 		}
+		else
+		{
+			SaisiInfo(ChoixColonne(&(*personne), nb_col-1), taille);
+		}
+		printf("\n");
+		Pause();
 	}
-	while (nb_col != 0);
+	else if (nb_col != 0)
+	{
+		printf("\nErreur de saisie\n\n");
+		Pause();
+	}
 }
 
 void SaisiInfo(char * value, int size)
@@ -382,8 +379,7 @@ int main()
 	infos personne[5200];
 	int indice_personne[5200];
 	int cpt_ligne = 0;
-	int choix_menu, colonne;
-	int nb_recherche, nb_modif;
+	int choix_menu, nb_recherche, nb_modif, colonne;
 	/***************Lecture du csv, rempli le tableau de structure***************/
 	Ouverture(personne, indice_personne, &cpt_ligne);
 	/***************Menu***************/
@@ -396,7 +392,7 @@ int main()
 		printf("\t-Saisir 3 pour modifier une personne dans l'annuaire\n");
 		printf("\t-Saisir 4 pour lister les personnes avec au moins une donnee manquante\n");
 		printf("\t-Saisir 5 pour effectuer une sauvegarde dans un nouveau fichier\n");
-		printf("\t-Saisir 6 pour effectuer un tri par insertion\n");
+		printf("\t-Saisir 6 pour effectuer un tri par insertion indirect\n");
 		printf("\t-Saisir 7 pour quitter\n\n");
 		scanf("%d", &choix_menu);
 		fflush(stdin);
@@ -411,26 +407,22 @@ int main()
 			{
 			/***************Recherche par indice***************/
 			case 1:
-				do
+				Clear();
+				printf("Saisir le numero de la personne a rechercher, il y a %d personnes rensignees (0 pour quitter) : ", cpt_ligne);
+				scanf("%d", &nb_recherche);
+				fflush(stdin);
+				if (nb_recherche > 0 && nb_recherche <= cpt_ligne)
 				{
-					Clear();
-					printf("Saisir le numero de la personne a rechercher, il y a %d personnes rensignees (0 pour quitter) : ", cpt_ligne);
-					scanf("%d", &nb_recherche);
-					fflush(stdin);
-					if (nb_recherche > 0 && nb_recherche <= cpt_ligne)
-					{
-						printf("\n");
-						AffichageComplet(personne[indice_personne[nb_recherche-1]], nb_recherche);
-						printf("\n");
-						Pause();
-					}
-					else if (nb_recherche != 0)
-					{
-						printf("\nErreur de saisie\n\n");
-						Pause();
-					}
+					printf("\n");
+					AffichageComplet(personne[indice_personne[nb_recherche-1]], nb_recherche);
+					printf("\n");
+					Pause();
 				}
-				while (nb_recherche != 0);
+				else if (nb_recherche != 0)
+				{
+					printf("\nErreur de saisie\n\n");
+					Pause();
+				}
 				break;
 
 			/***************Ajout d'une personne***************/
@@ -444,23 +436,19 @@ int main()
 
 			/***************Modification d'une personne***************/
 			case 3:
-				do
+				Clear();
+				printf("Saisir le numero de la personne a modifier, il y a %d personnes rensignees (0 pour quitter) : ", cpt_ligne);
+				scanf("%d", &nb_modif);
+				fflush(stdin);
+				if (nb_modif > 0 && nb_modif <= cpt_ligne)
 				{
-					Clear();
-					printf("Saisir le numero de la personne a modifier, il y a %d personnes rensignees (0 pour quitter) : ", cpt_ligne);
-					scanf("%d", &nb_modif);
-					fflush(stdin);
-					if (nb_modif > 0 && nb_modif <= cpt_ligne)
-					{
-						Modif(&personne[indice_personne[nb_modif-1]], nb_modif);
-					}
-					else if (nb_modif != 0)
-					{
-						printf("\nErreur de saisie\n\n");
-						Pause();
-					}
+					Modif(&personne[indice_personne[nb_modif-1]], nb_modif);
 				}
-				while (nb_modif != 0);
+				else if (nb_modif != 0)
+				{
+					printf("\nErreur de saisie\n\n");
+					Pause();
+				}
 				break;
 
 			/***************Client avec au moins une case vide***************/
@@ -481,26 +469,22 @@ int main()
 
 			/***************Tri***************/
 			case 6:
-				do
+				Clear();
+				printf("1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n(0 pour quitter)\n\nSaisir le numero de la colonne selon laquelle l'annuaire va etre trie : ");
+				scanf("%d", &colonne);
+				fflush(stdin);
+				if (colonne >= 1 && colonne <= 7)
 				{
-					Clear();
-					printf("1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n\nSaisir le numero de la colonne selon laquelle l'annuaire va etre trie : ");
-					scanf("%d", &colonne);
-					fflush(stdin);
-					if (colonne >= 1 && colonne <= 7)
-					{
-						// TriSelection(personne, colonne - 1, cpt_ligne);
-						// TriInsertion(personne, colonne - 1, cpt_ligne);
-						TriInsertionIndirect(personne, indice_personne, colonne - 1, cpt_ligne);
-						printf("\nLe tri par selection a ete effectue\n\n");
-					}
-					else
-					{
-						printf("\nErreur de saisie\n\n");
-					}
-					Pause();
+					// TriSelection(personne, colonne - 1, cpt_ligne);
+					// TriInsertion(personne, colonne - 1, cpt_ligne);
+					TriInsertionIndirect(personne, indice_personne, colonne - 1, cpt_ligne);
+					printf("\nLe tri par insertion indirect a ete effectue\n\n");
 				}
-				while (colonne < 1 || colonne > 7);
+				else if (colonne != 0)
+				{
+					printf("\nErreur de saisie\n\n");
+				}
+				Pause();
 				break;
 
 			default:
