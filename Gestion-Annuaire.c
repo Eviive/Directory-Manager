@@ -1,7 +1,9 @@
 // Spécification formelle : Précondition doit être très courte car une fonction fait quelque chose de très précis
 // Interdire les ',' dans les input
-// Enlever les pointeurs dans les fonctions où je n'ai pas besoin de modifier les valeurs
+// Enlever les pointeurs dans les fonctions où je n'ai pas besoin de modifier les valeurs (dans ChoixColonne par exemple)
+// en gros partout où il y a "infos * personne"
 // fflush avec la méthode du TP6 si jamais ça marche pas sur un certain OS
+// nombre d'occurrences trouvées (permet d'afficher 0 occurrence trouvée si pas de résultat)
 
 // La recherche et l'affichage des données sur un client à partir de son nom, son prénom et son numéro de téléphone ou son adresse mél (une occurrence car ces couples sont uniques => recherche dichotomique => trié ?)
 // Nom Prénom Tel / Nom Prénom Mail
@@ -15,7 +17,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-// #define chemin_annuaire "Annuaire/annuaire_reduit.csv"
 #define chemin_annuaire "Annuaire/annuaire_test.csv"
 #define chemin_annuaire_sauvegarde "Annuaire/annuaire_sauvegarde.csv"
 
@@ -219,10 +220,23 @@ void Ajout(infos * personne, int indice_personne[tableau], int * cpt_ligne)
 	(*cpt_ligne)++;
 }
 
+void Suppression(infos personne[tableau], int indice_personne[tableau], int * cpt_ligne, int nb_suppression)
+{
+	for (int i = 0; i <= 6; i++)
+	{
+		ChoixColonne(&personne[indice_personne[nb_suppression]], i)[0] = '\0';
+	}
+	for (int i = nb_suppression; i < *(cpt_ligne) - 1; i++)
+	{
+		personne[indice_personne[i]] = personne[indice_personne[i + 1]];
+	}
+	(*cpt_ligne)--;
+}
+
 void Modif(infos * personne, int indice)
 {
 	int nb_col;
-	printf("1: Prenom, 2: Nom, 3: Ville Code, 4: postal, 5: Telephone, 6: Email, 7: Metier\n\nSaisissez le numero de la colonne a modifier (0 pour quitter): ");
+	printf("\n1: Prenom, 2: Nom, 3: Ville Code, 4: postal, 5: Telephone, 6: Email, 7: Metier\n\nSaisissez le numero de la colonne a modifier (0 pour quitter): ");
 	scanf("%d", &nb_col);
 	fflush(stdin);
 	if (nb_col >= 1 && nb_col <= 7)
@@ -408,31 +422,48 @@ int main()
 	infos personne[tableau];
 	int indice_personne[tableau];
 	int cpt_ligne = 0;
-	int choix_menu, nb_recherche, nb_modif, colonne;
+	int choix_menu, nb_recherche, nb_modif, nb_suppression, colonne;
 	char value_recherche[taille];
 	/***************Lecture du csv, rempli le tableau de structure***************/
 	Ouverture(personne, indice_personne, &cpt_ligne);
 	/***************Menu***************/
 	do
 	{
+		// 1/ L’ajout de nouveaux clients ;
+		// 2/ La modification des données sur un client ;
+		// 3/ La suppression d’un client ;
+		// 4/ L’affichage de la liste de tous les clients (toutes les données : nom, prénom, adresse,
+		// 		numéro de téléphone, adresse mél, profession), avec la possibilité de trier cette liste sur
+		// 		le nom, le prénom, le code postal, la profession ;
+		// 5/ Un filtre sur le nom, le prénom, la profession, le code postal permettant d’afficher la liste
+		// 		des clients répondant au critère donné. Par exemple, on peut vouloir afficher la liste des
+		// 		clients dont le prénom commence par la lettre “J” ou dont le nom est “Leroy” ou encore
+		// 		dont la profession est “enseignant” ;
+		// 6/ La recherche et l'affichage des données sur un client à partir de son nom, son prénom et
+		// 		son numéro de téléphone ou son adresse mél ;
+		// 7/ L’affichage du nombre et de la liste de tous les clients pour lesquels des données sont
+		// 		manquantes dans l’annuaire ;
+		// 8/ La sauvegarde des données dans un fichier.
 		printf("Bienvenue dans le menu du gestionnaire d'annuaire\n");
 		printf("\t-Saisir 1 pour effectuer une recherche par indice\n");
-		printf("\t-Saisir 2 pour ajouter une personne a l'annuaire\n");
-		printf("\t-Saisir 3 pour modifier une personne dans l'annuaire\n");
-		printf("\t-Saisir 4 pour lister les personnes avec au moins une donnee manquante\n");
-		printf("\t-Saisir 5 pour effectuer une sauvegarde dans un nouveau fichier\n");
-		printf("\t-Saisir 6 pour effectuer un tri par insertion indirect\n");
-		printf("\t-Saisir 7 pour effectuer une recherche sequentielle triee\n");
-		printf("\t-Saisir 8 pour quitter\n\n");
+		printf("\t-Saisir 2 pour ajouter une personne a l'annuaire\n"); 							// Numéro 1
+		printf("\t-Saisir 3 pour modifier une personne dans l'annuaire\n");							// Numéro 2
+		printf("\t-Saisir 4 pour supprimer une personne de l'annuaire\n");							// Numéro 3
+		printf("\t-Saisir 5 pour effectuer un tri par insertion indirect\n");						// ~Numéro 4 (+ affichage à rajouter)
+		printf("\t-Saisir 6 pour effectuer une recherche sequentielle triee\n");					// ~Numéro 5 (+ filtre à rajouter)
+		// Numéro 6 : Recherche et affichage des données sur un client à partir de nom / prénom / tel ou mail
+		printf("\t-Saisir 7 pour lister les personnes avec au moins une donnee manquante\n");		// Numéro 7
+		printf("\t-Saisir 8 pour effectuer une sauvegarde dans un nouveau fichier\n");				// Numéro 8
+		printf("\t-Saisir 9 pour quitter\n\n");
 		scanf("%d", &choix_menu);
 		fflush(stdin);
-		if (choix_menu < 1 || choix_menu > 8)
+		if (choix_menu < 1 || choix_menu > 9)
 		{
 			printf("\nErreur de saisie\n\n");
 			Pause();
 			Clear();
 		}
-		else if (choix_menu >= 1 && choix_menu <= 7)
+		else if (choix_menu >= 1 && choix_menu <= 8)
 		{
 			switch (choix_menu)
 			{
@@ -473,7 +504,6 @@ int main()
 				fflush(stdin);
 				if (nb_modif > 0 && nb_modif <= cpt_ligne)
 				{
-					Clear();
 					Modif(&personne[indice_personne[nb_modif-1]], nb_modif);
 				}
 				else if (nb_modif != 0)
@@ -483,25 +513,28 @@ int main()
 				Pause();
 				Clear();
 				break;
-
-			/***************Client avec au moins une case vide***************/
+			
+			/***************Suppression***************/
 			case 4:
 				Clear();
-				DonneeManquante(personne, indice_personne, cpt_ligne - 1);
-				Pause();
-				Clear();
-				break;
-
-			/***************Sauvegarde dans un nouveau fichier***************/
-			case 5:
-				Clear();
-				Sauvegarde(personne, indice_personne, cpt_ligne - 1);
+				printf("Saisir le numero de la personne a supprimer, il y a %d personnes rensignees (0 pour quitter) : ", cpt_ligne);
+				scanf("%d", &nb_suppression);
+				fflush(stdin);
+				if (nb_suppression > 0 && nb_suppression <= cpt_ligne)
+				{
+					Suppression(personne, indice_personne, &cpt_ligne, nb_suppression - 1);
+					printf("\n");
+				}
+				else if (nb_suppression != 0)
+				{
+					printf("\nErreur de saisie\n\n");
+				}
 				Pause();
 				Clear();
 				break;
 
 			/***************Tri***************/
-			case 6:
+			case 5:
 				Clear();
 				printf("1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n(0 pour quitter)\n\nSaisir le numero de la colonne selon laquelle l'annuaire va etre trie : ");
 				scanf("%d", &colonne);
@@ -521,7 +554,8 @@ int main()
 				Clear();
 				break;
 			
-			case 7:
+			/***************Recherche***************/
+			case 6:
 				Clear();
 				printf("1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n(0 pour quitter)\n\nSaisir le numero de la colonne a rechercher : ");
 				scanf("%d", &colonne);
@@ -533,6 +567,7 @@ int main()
 				if (colonne >= 1 && colonne <= 7)
 				{
 					// RechercheSequentielle(personne, indice_personne, cpt_ligne, colonne - 1, value_recherche);
+					TriInsertionIndirect(personne, indice_personne, colonne - 1, cpt_ligne);
 					RechercheSequentielleTriee(personne, indice_personne, cpt_ligne, colonne - 1, value_recherche);
 					printf("\nLa recherche sequentielle triee a ete effectue\n\n");
 				}
@@ -544,13 +579,29 @@ int main()
 				Clear();
 				break;
 
+			/***************Client avec au moins une case vide***************/
+			case 7:
+				Clear();
+				DonneeManquante(personne, indice_personne, cpt_ligne - 1);
+				Pause();
+				Clear();
+				break;
+
+			/***************Sauvegarde dans un nouveau fichier***************/
+			case 8:
+				Clear();
+				Sauvegarde(personne, indice_personne, cpt_ligne - 1);
+				Pause();
+				Clear();
+				break;
+
 			default:
 				printf("Erreur switch");
 				break;
 			}
 		}
 	}
-	while (choix_menu != 8);
+	while (choix_menu != 9);
 	return 0;
 }
 
@@ -568,6 +619,10 @@ int main()
 // les éliminer peu à peu
 
 // présentation courte => le principe (1 phrase), complexité théorique
+
+// Recherche dichotomique : complexité logarithmique
+// Tri par sélection : complexité taille²
+// Recherche linéaire : O de n
 
 
 
