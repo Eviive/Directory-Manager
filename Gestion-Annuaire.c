@@ -38,14 +38,15 @@ void Ouverture(infos personne[tableau], int indice_personne[tableau], int * cpt_
 void AffichageComplet(infos personne, int indice);
 void AffichageUnique(char * value);
 void Ajout(infos * personne, int indice_personne[tableau], int * cpt_ligne);
-void Modif(infos * personne, int indice);
+void Modif(infos * personne);
 void SaisiInfo(char * value, int size);
 void EcritureFichier(FILE * annuaire, infos personne);
 void DonneeManquante(infos personne[tableau], int indice_personne[tableau], int cpt_ligne);
 char DonneeEmpty(infos personne);
 void Sauvegarde(infos personne[tableau], int indice_personne[tableau], int cpt_ligne);
-void Tri(infos personne[tableau], int indice_personne[tableau], int nb_colonne, int cpt_ligne);
-void Filtre(infos personne[tableau], int indice_personne[tableau], int cpt_ligne, int nb_colonne, char str_filtre[taille], int nb_mode);
+void Tri(infos personne[tableau], int indice_personne[tableau], unsigned int nb_colonne, int cpt_ligne);
+int Recherche(infos personne[tableau], int indice_personne[tableau], int cpt_ligne, char str_prenom[taille], char str_nom[taille], char str_third[taille], unsigned int nb_colonne);
+void Filtre(infos personne[tableau], int indice_personne[tableau], int cpt_ligne, unsigned int nb_colonne, char str_filtre[taille], int nb_mode);
 
 void Clear()
 {
@@ -164,6 +165,9 @@ void AffichageComplet(infos personne, int indice)
 		case 5:
 			taille_aff = 30;
 			break;
+
+		default:
+			printf("Erreur switch");
 		}
 		printf("%*.*s | ", -taille_aff, taille_aff, ChoixColonne(&personne, i));
 	}
@@ -230,18 +234,17 @@ void Suppression(infos personne[tableau], int indice_personne[tableau], int * cp
 	(*cpt_ligne)--;
 }
 
-void Modif(infos * personne, int indice)
+void Modif(infos * personne)
 {
-	int nb_col;
-	printf("\n1: Prenom, 2: Nom, 3: Ville Code, 4: postal, 5: Telephone, 6: Email, 7: Metier\n\nSaisissez le numero de la colonne a modifier (0 pour quitter) : ");
+	char nb_col;
+	printf("\n1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n(0 pour quitter)\n\nSaisissez le numero de la colonne a modifier : ");
 	scanf("%d", &nb_col);
 	fflush(stdin);
 	if (nb_col >= 1 && nb_col <= 7)
 	{
-		printf("\nPersonne : %d\n", indice);
-		printf("Valeur actuelle : ");
+		printf("\nValeur actuelle : ");
 		AffichageUnique(ChoixColonne(personne, nb_col-1));
-		printf("\nSaisir la nouvelle valeur : ");
+		printf("Saisir la nouvelle valeur : ");
 		if (nb_col == 4)
 		{
 			SaisiInfo(ChoixColonne(personne, nb_col-1), taille_code_postal);
@@ -328,7 +331,7 @@ void Sauvegarde(infos personne[tableau], int indice_personne[tableau], int cpt_l
 	printf("Sauvegarde effectue (annuaire_sauvegarde.csv)\n\n");
 }
 
-void Tri(infos personne[tableau], int indice_personne[tableau], int nb_colonne, int cpt_ligne)
+void Tri(infos personne[tableau], int indice_personne[tableau], unsigned int nb_colonne, int cpt_ligne)
 {
 	int i = 1, j, petit;
 	while (i <= cpt_ligne - 1)
@@ -345,7 +348,26 @@ void Tri(infos personne[tableau], int indice_personne[tableau], int nb_colonne, 
 	}
 }
 
-void Filtre(infos personne[tableau], int indice_personne[tableau], int cpt_ligne, int nb_colonne, char str_filtre[taille], int nb_mode)
+int Recherche(infos personne[tableau], int indice_personne[tableau], int cpt_ligne, char str_prenom[taille], char str_nom[taille], char str_third[taille], unsigned int nb_colonne)
+{
+	int i = 0;
+	while (i < cpt_ligne && strcasecmp(ChoixColonne(&personne[indice_personne[i]], 0), str_prenom) < 0)
+	{
+		i++;
+	}
+	while (i < cpt_ligne && strcasecmp(ChoixColonne(&personne[indice_personne[i]], 0), str_prenom) == 0)
+	{
+		if (strcasecmp(ChoixColonne(&personne[indice_personne[i]], 1), str_nom) == 0 && strcasecmp(ChoixColonne(&personne[indice_personne[i]], nb_colonne), str_third) == 0)
+		{
+			AffichageComplet(personne[indice_personne[i]], i);
+			return i;
+		}
+		i++;
+	}
+	return -1;
+}
+
+void Filtre(infos personne[tableau], int indice_personne[tableau], int cpt_ligne, unsigned int nb_colonne, char str_filtre[taille], int nb_mode)
 {
 	/***************Créer une fonction pour chaque groupe de recherche (case 1 + case 3 / case 2 / case 4)***************/
 	int i = 0, j;
@@ -368,7 +390,6 @@ void Filtre(infos personne[tableau], int indice_personne[tableau], int cpt_ligne
 		{
 			char str_lower[taille];
 			strcpy(str_lower, ChoixColonne(&personne[indice_personne[i]], nb_colonne));
-			printf("%s\n", str_lower);
 			for (int j = 0; j < strlen(str_lower); j++)
 			{
 				/***************To lower car strstr est sensible à la casse***************/
@@ -424,60 +445,49 @@ void Filtre(infos personne[tableau], int indice_personne[tableau], int cpt_ligne
 			i++;
 		}
 		break;
+	
+	default:
+		printf("Erreur switch");
 	}
 }
 
+/***************Split la fonction filtre pour que ce soit plus précis***************/
 int main()
 {
-	unsigned int cpt_ligne = 0;
+	unsigned int cpt_ligne = 0, indice_personne[tableau];;
 	infos personne[tableau];
-	int indice_personne[tableau];
 
-	char nb_menu, nb_recherche;
-	int nb_colonne;
+	char menu, colonne, recherche, action;
 	char str_filtre[taille];
-	char str_rech_prenom[taille], str_rech_nom[taille], str_rech_tel[taille_telephone], str_rech_email[taille];
+	char str_rech_prenom[taille], str_rech_nom[taille], str_rech_third[taille];
+	unsigned int return_recherche;
 	/***************Lecture du csv, rempli le tableau de structure***************/
 	Ouverture(personne, indice_personne, &cpt_ligne);
 	/***************Menu***************/
 	do
 	{
-
-
-		// 4/ L’affichage de la liste de tous les clients (toutes les données : nom, prénom, adresse,
-		// 		numéro de téléphone, adresse mél, profession), avec la possibilité de trier cette liste sur
-		// 		le nom, le prénom, le code postal, la profession
-		// 5/ Un filtre sur le nom, le prénom, la profession, le code postal permettant d’afficher la liste
-		// 		des clients répondant au critère donné. Par exemple, on peut vouloir afficher la liste des
-		// 		clients dont le prénom commence par la lettre “J” ou dont le nom est “Leroy” ou encore
-		// 		dont la profession est “enseignant”
-
-
 		printf("Bienvenue dans le menu du gestionnaire d'annuaire\n");
 		printf("\t-Saisir 1 pour ajouter un client\n");
-		// 2- Rechercher un client via nom/prénom/mail ou tel, l'afficher	=> Modifier ce client
-		// 						   			   								=> Supprimer ce client
-		// Trier par prénom, recherche séquentielle du prénom, tester à chaque fois si le nom / mail ou tel correspond aux valeurs recherché
 		printf("\t-Saisir 2 pour effectuer une recherche\n");
 		printf("\t-Saisir 3 pour afficher le contenu de l'annuaire\n");
 		printf("\t-Saisir 4 pour rechercher des clients via un filtre\n");
 		printf("\t-Saisir 5 pour afficher les clients avec des donnees manquantes\n");
 		printf("\t-Saisir 6 pour sauvegarder l'annuaire\n");
 		printf("\t-Saisir 7 pour quitter\n");
-		scanf("%c", &nb_menu);
+		scanf("%d", &menu);
 		fflush(stdin);
-		if (nb_menu < '1' || nb_menu > '7')
+		if (menu < 1 || menu > 7)
 		{
 			printf("\nErreur de saisie\n\n");
 			Pause();
 			Clear();
 		}
-		else if (nb_menu >= '1' && nb_menu <= '6')
+		else if (menu >= 1 && menu <= 6)
 		{
-			switch (nb_menu)
+			switch (menu)
 			{
 			/***************Ajout***************/
-			case '1':
+			case 1:
 				Clear();
 				Ajout(&personne[cpt_ligne], indice_personne, &cpt_ligne);
 				printf("\n");
@@ -486,38 +496,64 @@ int main()
 				break;
 
 			/***************Recherche***************/
-			case '2':
+			case 2:
 				Clear();
 				printf("1: Prenom / Nom / Email, 2: Prenom / Nom / Telephone\n(0 pour quitter)\n\nSaisir le triplet a rechercher : ");
-				scanf("%c", &nb_recherche);
+				scanf("%d", &recherche);
 				fflush(stdin);
 				printf("\n");
-				if (nb_recherche == '1' || nb_recherche == '2')
+				if (recherche == 1 || recherche == 2)
 				{
 					printf("Saisir le prenom a rechercher : ");
 					scanf("%s", &str_rech_prenom);
 					fflush(stdin);
 					printf("Saisir le nom a rechercher : ");
-					scanf("%s", &str_rech_prenom);
+					scanf("%s", &str_rech_nom);
 					fflush(stdin);
-					if (nb_recherche == '1')
+					if (recherche == 1)
 					{
+						colonne = 5;
 						printf("Saisir l'email a rechercher : ");
-						scanf("%s", &str_rech_email);
+						scanf("%s", &str_rech_third);
 						fflush(stdin);
 					}
 					else
 					{
+						colonne = 4;
 						printf("Saisir le telephone a rechercher : ");
-						scanf("%s", &str_rech_tel);
+						scanf("%s", &str_rech_third);
 						fflush(stdin);
 					}
-					printf("\n");
+					Clear();
 					Tri(personne, indice_personne, 0, cpt_ligne);
-					// Recherche(personne, indice_personne, cpt_ligne, 0, str_recherche, 1);
-					printf("\nLa recherche a ete effectue\n\n");
+					return_recherche = Recherche(personne, indice_personne, cpt_ligne, str_rech_prenom, str_rech_nom, str_rech_third, colonne);
+					if (return_recherche != -1)
+					{
+						printf("\n0: Ne rien faire, 1: Modifier ce client, 2: Supprimer ce client\n\nQuelle action souhaitez-vous effectuer : ");
+						scanf("%d", &action);
+						fflush(stdin);
+						if (action == 1)
+						{
+							Clear();
+							AffichageComplet(personne[indice_personne[return_recherche]], return_recherche);
+							Modif(&personne[indice_personne[return_recherche]]);
+						}
+						else if (action == 2)
+						{
+							printf("\n");
+							Suppression(personne, indice_personne, &cpt_ligne, return_recherche);
+						}
+						else if (action != 0)
+						{
+							printf("\nErreur de saisie\n\n");
+						}
+					}
+					else
+					{
+						printf("Aucune correspondance n'a ete trouvee\n\n");
+					}
 				}
-				else if (nb_colonne != 0)
+				else if (recherche != 0)
 				{
 					printf("Erreur de saisie\n\n");
 				}
@@ -526,17 +562,17 @@ int main()
 				break;
 
 			/***************Afficher l'annuaire***************/
-			case '3':
+			case 3:
 				Clear();
 				printf("0: Ne pas trier, 1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n\nQuelle colonne souhaitez-vous trier avant d'afficher l'annuaire : ");
-				scanf("%d", &nb_colonne);
+				scanf("%d", &colonne);
 				fflush(stdin);
 				printf("\n");
-				if (nb_colonne >= 0 && nb_colonne <= 7)
+				if (colonne >= 0 && colonne <= 7)
 				{
-					if (nb_colonne != 0)
+					if (colonne != 0)
 					{
-						Tri(personne, indice_personne, nb_colonne - 1, cpt_ligne);
+						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
 					}
 					for (int i = 0; i < cpt_ligne; i++)
 					{
@@ -553,13 +589,13 @@ int main()
 				break;
 
 			/***************Filtre***************/
-			case '4':
+			case 4:
 				Clear();
 				printf("1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n(0 pour quitter)\n\nSaisir le numero de la colonne a filtrer : ");
-				scanf("%d", &nb_colonne);
+				scanf("%d", &colonne);
 				fflush(stdin);
 				printf("\n");
-				if (nb_colonne >= 1 && nb_colonne <= 7)
+				if (colonne >= 1 && colonne <= 7)
 				{
 					do
 					{
@@ -568,7 +604,7 @@ int main()
 						fflush(stdin);
 					}
 					while (strlen(str_filtre) == 0);
-					printf("\n");
+					Clear();
 					if (str_filtre[0] == '*' && str_filtre[strlen(str_filtre) - 1] == '*')
 					{
 						for (int i = 0; i < strlen(str_filtre); i++)
@@ -584,13 +620,13 @@ int main()
 							}
 						}
 						str_filtre[strlen(str_filtre) - 1] = '\0';
-						Filtre(personne, indice_personne, cpt_ligne, nb_colonne - 1, str_filtre, 2);
+						Filtre(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre, 2);
 						printf("\nLa recherche via le filtre *%s* a ete effectue\n\n", str_filtre);
 					}
 					else if (str_filtre[strlen(str_filtre) - 1] == '*')
 					{
-						Tri(personne, indice_personne, nb_colonne - 1, cpt_ligne);
-						Filtre(personne, indice_personne, cpt_ligne, nb_colonne - 1, str_filtre, 3);
+						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
+						Filtre(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre, 3);
 						printf("\nLe recherche via le filtre %s a ete effectue\n\n", str_filtre);
 					}
 					else if (str_filtre[0] == '*')
@@ -599,17 +635,17 @@ int main()
 						{
 							str_filtre[i] = str_filtre[i + 1];
 						}
-						Filtre(personne, indice_personne, cpt_ligne, nb_colonne - 1, str_filtre, 4);
+						Filtre(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre, 4);
 						printf("\nLe recherche via le filtre *%s a ete effectue\n\n", str_filtre);
 					}
 					else
 					{
-						Tri(personne, indice_personne, nb_colonne - 1, cpt_ligne);
-						Filtre(personne, indice_personne, cpt_ligne, nb_colonne - 1, str_filtre, 1);
+						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
+						Filtre(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre, 1);
 						printf("\nLe recherche via le filtre %s a ete effectue\n\n", str_filtre);
 					}
 				}
-				else if (nb_colonne != 0)
+				else if (colonne != 0)
 				{
 					printf("Erreur de saisie\n\n");
 				}
@@ -618,7 +654,7 @@ int main()
 				break;
 
 			/***************Données manquantes***************/
-			case '5':
+			case 5:
 				Clear();
 				DonneeManquante(personne, indice_personne, cpt_ligne - 1);
 				Pause();
@@ -626,7 +662,7 @@ int main()
 				break;
 
 			/***************Sauvegarde***************/
-			case '6':
+			case 6:
 				Clear();
 				Sauvegarde(personne, indice_personne, cpt_ligne - 1);
 				Pause();
@@ -635,11 +671,10 @@ int main()
 
 			default:
 				printf("Erreur switch");
-				break;
 			}
 		}
 	}
-	while (nb_menu != '7');
+	while (menu != 7);
 	return 0;
 }
 
