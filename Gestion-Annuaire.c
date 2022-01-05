@@ -349,7 +349,6 @@ void Filtre(infos personne[tableau], int indice_personne[tableau], int cpt_ligne
 {
 	/***************Créer une fonction pour chaque groupe de recherche (case 1 + case 3 / case 2 / case 4)***************/
 	int i = 0, j;
-	char elem[taille], elem_etu[taille] = "";
 	switch (nb_mode)
 	{
 	case 1: // Séquentielle triée
@@ -364,10 +363,25 @@ void Filtre(infos personne[tableau], int indice_personne[tableau], int cpt_ligne
 		}
 		break;
 	
-	case 2: // Filtre sous-chaine (strstr est sensible à la casse)
+	case 2: // Filtre sous-chaine
 		while (i < cpt_ligne)
 		{
-			if (strstr(ChoixColonne(&personne[indice_personne[i]], nb_colonne), str_filtre) != NULL)
+			char str_lower[taille];
+			strcpy(str_lower, ChoixColonne(&personne[indice_personne[i]], nb_colonne));
+			printf("%s\n", str_lower);
+			for (int j = 0; j < strlen(str_lower); j++)
+			{
+				/***************To lower car strstr est sensible à la casse***************/
+				if (str_lower[j] >= 'A' && str_lower[j] <= 'Z')
+				{	
+					str_lower[j] = str_lower[j] + 32;
+				}
+				else
+				{
+					str_lower[j] = str_lower[j];
+				}
+			}
+			if (strstr(str_lower, str_filtre) != NULL)
 			{
 				AffichageComplet(personne[indice_personne[i]], i);
 			}
@@ -390,8 +404,10 @@ void Filtre(infos personne[tableau], int indice_personne[tableau], int cpt_ligne
 	case 4: // Filtre de fin de chaine
 		while (i < cpt_ligne)
 		{
+			int diff;
+			char elem[taille], elem_etu[taille] = "";
 			strcpy(elem, ChoixColonne(&personne[indice_personne[i]], nb_colonne));
-			int diff = strlen(elem) - strlen(str_filtre);
+			diff = strlen(elem) - strlen(str_filtre);
 			if (diff >= 0)
 			{
 				j = 0;
@@ -413,14 +429,13 @@ void Filtre(infos personne[tableau], int indice_personne[tableau], int cpt_ligne
 
 int main()
 {
-	int cpt_ligne = 0;
+	unsigned int cpt_ligne = 0;
 	infos personne[tableau];
 	int indice_personne[tableau];
 
-	char nb_menu;
+	char nb_menu, nb_recherche;
 	int nb_colonne;
 	char str_filtre[taille];
-	int nb_recherche;
 	char str_rech_prenom[taille], str_rech_nom[taille], str_rech_tel[taille_telephone], str_rech_email[taille];
 	/***************Lecture du csv, rempli le tableau de structure***************/
 	Ouverture(personne, indice_personne, &cpt_ligne);
@@ -474,10 +489,10 @@ int main()
 			case '2':
 				Clear();
 				printf("1: Prenom / Nom / Email, 2: Prenom / Nom / Telephone\n(0 pour quitter)\n\nSaisir le triplet a rechercher : ");
-				scanf("%d", &nb_recherche);
+				scanf("%c", &nb_recherche);
 				fflush(stdin);
 				printf("\n");
-				if (nb_recherche == 1 || nb_recherche == 2)
+				if (nb_recherche == '1' || nb_recherche == '2')
 				{
 					printf("Saisir le prenom a rechercher : ");
 					scanf("%s", &str_rech_prenom);
@@ -485,7 +500,7 @@ int main()
 					printf("Saisir le nom a rechercher : ");
 					scanf("%s", &str_rech_prenom);
 					fflush(stdin);
-					if (nb_recherche == 1)
+					if (nb_recherche == '1')
 					{
 						printf("Saisir l'email a rechercher : ");
 						scanf("%s", &str_rech_email);
@@ -558,17 +573,25 @@ int main()
 					{
 						for (int i = 0; i < strlen(str_filtre); i++)
 						{
-							str_filtre[i] = str_filtre[i + 1];
+							/***************To lower car strstr est sensible à la casse***************/
+							if (str_filtre[i + 1] >= 'A' && str_filtre[i + 1] <= 'Z')
+							{	
+								str_filtre[i] = str_filtre[i + 1] + 32;
+							}
+							else
+							{
+								str_filtre[i] = str_filtre[i + 1];
+							}
 						}
 						str_filtre[strlen(str_filtre) - 1] = '\0';
 						Filtre(personne, indice_personne, cpt_ligne, nb_colonne - 1, str_filtre, 2);
-						printf("\nLa recherche via le filtre \"*%s*\" a ete effectue\n\n", str_filtre);
+						printf("\nLa recherche via le filtre *%s* a ete effectue\n\n", str_filtre);
 					}
 					else if (str_filtre[strlen(str_filtre) - 1] == '*')
 					{
 						Tri(personne, indice_personne, nb_colonne - 1, cpt_ligne);
 						Filtre(personne, indice_personne, cpt_ligne, nb_colonne - 1, str_filtre, 3);
-						printf("\nLe recherche via le filtre \"%s\" a ete effectue\n\n", str_filtre);
+						printf("\nLe recherche via le filtre %s a ete effectue\n\n", str_filtre);
 					}
 					else if (str_filtre[0] == '*')
 					{
@@ -577,13 +600,13 @@ int main()
 							str_filtre[i] = str_filtre[i + 1];
 						}
 						Filtre(personne, indice_personne, cpt_ligne, nb_colonne - 1, str_filtre, 4);
-						printf("\nLe recherche via le filtre \"*%s\" a ete effectue\n\n", str_filtre);
+						printf("\nLe recherche via le filtre *%s a ete effectue\n\n", str_filtre);
 					}
 					else
 					{
 						Tri(personne, indice_personne, nb_colonne - 1, cpt_ligne);
 						Filtre(personne, indice_personne, cpt_ligne, nb_colonne - 1, str_filtre, 1);
-						printf("\nLe recherche via le filtre \"%s\" a ete effectue\n\n", str_filtre);
+						printf("\nLe recherche via le filtre %s a ete effectue\n\n", str_filtre);
 					}
 				}
 				else if (nb_colonne != 0)
