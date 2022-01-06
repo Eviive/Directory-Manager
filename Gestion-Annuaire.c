@@ -15,7 +15,7 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <stdlib.h>
+#include <time.h>
 #include "Fonction.h"
 
 #define tableau 5200
@@ -30,7 +30,9 @@ int main()
 	char menu, colonne, recherche, action;
 	char str_filtre[taille];
 	char str_rech_prenom[taille], str_rech_nom[taille], str_rech_third[taille];
-	unsigned int return_recherche;
+	int return_recherche;
+
+	clock_t tic, toc;
 	/***************Lecture du csv, rempli le tableau de structure***************/
 	Ouverture(personne, indice_personne, &cpt_ligne);
 	/***************Menu***************/
@@ -90,8 +92,14 @@ int main()
 						fflush(stdin);
 					}
 					Clear();
+					tic = clock();
 					Tri(personne, indice_personne, 0, cpt_ligne);
+					toc = clock();
+					printf("Duree tri : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+					tic = clock();
 					return_recherche = Recherche(personne, indice_personne, cpt_ligne, str_rech_prenom, str_rech_nom, str_rech_third, colonne);
+					toc = clock();
+					printf("\nDuree recherche : %.lf ms\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
 					if (return_recherche != -1)
 					{
 						printf("\n0: Ne rien faire, 1: Modifier ce client, 2: Supprimer ce client\n\nQuelle action souhaitez-vous effectuer : ");
@@ -115,7 +123,7 @@ int main()
 					}
 					else
 					{
-						printf("Aucune correspondance n'a ete trouvee\n\n");
+						printf("\nAucune correspondance n'a ete trouvee\n\n");
 					}
 				}
 				else if (recherche != 0)
@@ -137,7 +145,10 @@ int main()
 				{
 					if (colonne != 0)
 					{
+						tic = clock();
 						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
+						toc = clock();
+						printf("Duree tri : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
 					}
 					for (int i = 0; i < cpt_ligne; i++)
 					{
@@ -185,14 +196,23 @@ int main()
 							}
 						}
 						str_filtre[strlen(str_filtre) - 1] = '\0';
+						tic = clock();
 						Filtre(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre, 2);
-						printf("\nLa recherche via le filtre *%s* a ete effectue\n\n", str_filtre);
+						toc = clock();
+						printf("\nDuree filtre : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+						printf("La recherche via le filtre *%s* a ete effectue\n\n", str_filtre);
 					}
 					else if (str_filtre[strlen(str_filtre) - 1] == '*')
 					{
+						tic = clock();
 						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
+						toc = clock();
+						printf("Duree tri : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+						tic = clock();
 						Filtre(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre, 3);
-						printf("\nLe recherche via le filtre %s a ete effectue\n\n", str_filtre);
+						toc = clock();
+						printf("\nDuree filtre : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+						printf("Le recherche via le filtre %s a ete effectue\n\n", str_filtre);
 					}
 					else if (str_filtre[0] == '*')
 					{
@@ -200,14 +220,23 @@ int main()
 						{
 							str_filtre[i] = str_filtre[i + 1];
 						}
+						tic = clock();
 						Filtre(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre, 4);
-						printf("\nLe recherche via le filtre *%s a ete effectue\n\n", str_filtre);
+						toc = clock();
+						printf("\nDuree filtre : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+						printf("Le recherche via le filtre *%s a ete effectue\n\n", str_filtre);
 					}
 					else
 					{
+						tic = clock();
 						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
+						toc = clock();
+						printf("Duree tri : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+						tic = clock();
 						Filtre(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre, 1);
-						printf("\nLe recherche via le filtre %s a ete effectue\n\n", str_filtre);
+						toc = clock();
+						printf("\nDuree filtre : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+						printf("Le recherche via le filtre %s a ete effectue\n\n", str_filtre);
 					}
 				}
 				else if (colonne != 0)
