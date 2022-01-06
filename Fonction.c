@@ -53,14 +53,18 @@ char * ChoixColonne(infos * personne, int value)
 
 void Ouverture(infos personne[], int indice_personne[], int * cpt_ligne)
 {
-	char ligne[300];
+	char ligne[300]; //chemin_annuaire[100];
 	int cpt_char = 0, cpt_virgule = 0, cpt_var = 0;
+
+	// printf("Saisir le chemin d'acces a l'annuaire : ");
+	// scanf("%s", &chemin_annuaire);
+	// fflush(stdin);
 
 	/****************Lecture du fichier****************/
 	FILE * annuaire_file = fopen(chemin_annuaire, "r");
 	if (annuaire_file == NULL)
 	{
-		printf("Echec ouverture fichier\n");
+		printf("\nEchec ouverture fichier\n");
 		exit(EXIT_FAILURE);
 	}
 	/****************Assignation de toutes les cellules à des variables****************/

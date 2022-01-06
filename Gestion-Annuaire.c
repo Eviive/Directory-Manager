@@ -34,6 +34,7 @@ int main()
 	/***************Lecture du csv, rempli le tableau de structure***************/
 	Ouverture(personne, indice_personne, &cpt_ligne);
 	/***************Menu***************/
+	Clear();
 	do
 	{
 		printf("Bienvenue dans le menu du gestionnaire d'annuaire\n");
