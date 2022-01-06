@@ -51,6 +51,36 @@ char * ChoixColonne(infos * personne, int value)
 	}
 }
 
+char * NameColonne(int value)
+{
+	switch (value)
+	{
+	case 0:
+		return "le prenom";
+
+	case 1:
+		return "le nom";
+
+	case 2:
+		return "la ville";
+
+	case 3:
+		return "le code postal";
+
+	case 4:
+		return "le numero de telephone";
+
+	case 5:
+		return "l'email";
+
+	case 6:
+		return "le metier";
+
+	default:
+		printf("Erreur switch");
+	}
+}
+
 void Ouverture(infos personne[], int indice_personne[], int * cpt_ligne)
 {
 	char ligne[300]; //chemin_annuaire[100];
@@ -148,34 +178,13 @@ void AffichageUnique(char * value)
 
 void Ajout(infos * personne, int indice_personne[], int * cpt_ligne)
 {
-	do
+	Clear();
+	for (int i = 0; i <= 6; i++)
 	{
-		Clear();
-		printf("Saisir le prenom : ");
-		SaisiInfo(ChoixColonne(personne, 0), taille);
-		printf("Saisir le nom : ");
-		SaisiInfo(ChoixColonne(personne, 1), taille);
-		printf("Saisir la ville : ");
-		SaisiInfo(ChoixColonne(personne, 2), taille);
-		printf("Saisir le code postal : ");
-		SaisiInfo(ChoixColonne(personne, 3), taille_code_postal);
-		printf("Saisir le numero de telephone : ");
-		SaisiInfo(ChoixColonne(personne, 4), taille_telephone);
-		printf("Saisir le email : ");
-		SaisiInfo(ChoixColonne(personne, 5), taille);
-		printf("Saisir le metier : ");
-		SaisiInfo(ChoixColonne(personne, 6), taille);
+		printf("Saisir %s : ", NameColonne(i));
+		scanf("%s", ChoixColonne(personne, i));
+		fflush(stdin);
 	}
-	while ((strlen((*personne).prenom) == 0
-		 && strlen((*personne).nom) == 0
-		 && strlen((*personne).ville) == 0
-		 && strlen((*personne).code_postal) == 0
-		 && strlen((*personne).telephone) == 0
-		 && strlen((*personne).email) == 0
-		 && strlen((*personne).metier) == 0)
-		 || (strlen((*personne).telephone) == 0)
-		 || (strlen((*personne).email) == 0)
-	);
 	indice_personne[(*cpt_ligne)] = (*cpt_ligne);
 	(*cpt_ligne)++;
 }
@@ -200,36 +209,13 @@ void Modif(infos * personne)
 		printf("\nValeur actuelle : ");
 		AffichageUnique(ChoixColonne(personne, nb_col-1));
 		printf("Saisir la nouvelle valeur : ");
-		if (nb_col == 4)
-		{
-			SaisiInfo(ChoixColonne(personne, nb_col-1), taille_code_postal);
-		}
-		else if (nb_col == 5)
-		{
-			SaisiInfo(ChoixColonne(personne, nb_col-1), taille_telephone);
-		}
-		else
-		{
-			SaisiInfo(ChoixColonne(personne, nb_col-1), taille);
-		}
+		scanf("%s", ChoixColonne(personne, nb_col-1));
+		fflush(stdin);
 		printf("\n");
 	}
 	else if (nb_col != 0)
 	{
 		printf("\nErreur de saisie\n\n");
-	}
-}
-
-void SaisiInfo(char * value, int size)
-{
-	fgets(value, size, stdin);
-	fflush(stdin);
-	for(int i = 0; i < strlen(value); i++ )
-	{
-		if(value[i] == '\n')
-		{
-			value[i] = '\0';
-		}
 	}
 }
 
@@ -318,13 +304,11 @@ int Recherche(infos personne[], int indice_personne[], int cpt_ligne, char str_p
 	return -1;
 }
 
-void Filtre(infos personne[], int indice_personne[], int cpt_ligne, unsigned int nb_colonne, char str_filtre[], int nb_mode)
+void FiltreTrie(infos personne[], int indice_personne[], int cpt_ligne, unsigned int nb_colonne, char str_filtre[])
 {
-	/***************Créer une fonction pour chaque groupe de recherche (case 1 + case 3 / case 2 / case 4)***************/
-	int i = 0, j;
-	switch (nb_mode)
+	int i = 0;
+	if (str_filtre[0] != '*' && str_filtre[strlen(str_filtre) - 1] != '*')// Séquentielle triée
 	{
-	case 1: // Séquentielle triée
 		while (i < cpt_ligne && strcasecmp(ChoixColonne(&personne[indice_personne[i]], nb_colonne), str_filtre) < 0)
 		{
 			i++;
@@ -334,34 +318,9 @@ void Filtre(infos personne[], int indice_personne[], int cpt_ligne, unsigned int
 			AffichageComplet(personne[indice_personne[i]], indice_personne[i]);
 			i++;
 		}
-		break;
-	
-	case 2: // Filtre sous-chaine
-		while (i < cpt_ligne)
-		{
-			char str_lower[taille];
-			strcpy(str_lower, ChoixColonne(&personne[indice_personne[i]], nb_colonne));
-			for (int j = 0; j < strlen(str_lower); j++)
-			{
-				/***************To lower car strstr est sensible à la casse***************/
-				if (str_lower[j] >= 'A' && str_lower[j] <= 'Z')
-				{	
-					str_lower[j] = str_lower[j] + 32;
-				}
-				else
-				{
-					str_lower[j] = str_lower[j];
-				}
-			}
-			if (strstr(str_lower, str_filtre) != NULL)
-			{
-				AffichageComplet(personne[indice_personne[i]], indice_personne[i]);
-			}
-			i++;
-		}
-		break;
-
-	case 3: // Filtre de début de chaine (séquentielle triée)
+	}
+	else // Filtre de début de chaine (séquentielle triée)
+	{
 		while (i < cpt_ligne && strncasecmp(ChoixColonne(&personne[indice_personne[i]], nb_colonne), str_filtre, strlen(str_filtre) - 1) < 0)
 		{
 			i++;
@@ -371,33 +330,58 @@ void Filtre(infos personne[], int indice_personne[], int cpt_ligne, unsigned int
 			AffichageComplet(personne[indice_personne[i]], indice_personne[i]);
 			i++;
 		}
-		break;
+	}
+}
 
-	case 4: // Filtre de fin de chaine
-		while (i < cpt_ligne)
+void FinDeChaine(infos personne[], int indice_personne[], int cpt_ligne, unsigned int nb_colonne, char str_filtre[])
+{
+	int i = 0, j;
+	while (i < cpt_ligne)
+	{
+		int diff;
+		char elem[taille], elem_etu[taille] = "";
+		strcpy(elem, ChoixColonne(&personne[indice_personne[i]], nb_colonne));
+		diff = strlen(elem) - strlen(str_filtre);
+		if (diff >= 0)
 		{
-			int diff;
-			char elem[taille], elem_etu[taille] = "";
-			strcpy(elem, ChoixColonne(&personne[indice_personne[i]], nb_colonne));
-			diff = strlen(elem) - strlen(str_filtre);
-			if (diff >= 0)
+			j = 0;
+			for (int i = diff; i < strlen(elem); i++)
 			{
-				j = 0;
-				for (int i = diff; i < strlen(elem); i++)
-				{
-					elem_etu[j] = elem[i];
-					j++;
-				}
-				if (strcasecmp(elem_etu, str_filtre) == 0)
-				{
-					AffichageComplet(personne[indice_personne[i]], indice_personne[i]);
-				}
+				elem_etu[j] = elem[i];
+				j++;
 			}
-			i++;
+			if (strcasecmp(elem_etu, str_filtre) == 0)
+			{
+				AffichageComplet(personne[indice_personne[i]], indice_personne[i]);
+			}
 		}
-		break;
-	
-	default:
-		printf("Erreur switch");
+		i++;
+	}
+}
+
+void SousChaine(infos personne[], int indice_personne[], int cpt_ligne, unsigned int nb_colonne, char str_filtre[])
+{
+	int i = 0;
+	while (i < cpt_ligne)
+	{
+		char str_lower[taille];
+		strcpy(str_lower, ChoixColonne(&personne[indice_personne[i]], nb_colonne));
+		for (int j = 0; j < strlen(str_lower); j++)
+		{
+			/***************To lower car strstr est sensible à la casse***************/
+			if (str_lower[j] >= 'A' && str_lower[j] <= 'Z')
+			{
+				str_lower[j] = str_lower[j] + 32;
+			}
+			else
+			{
+				str_lower[j] = str_lower[j];
+			}
+		}
+		if (strstr(str_lower, str_filtre) != NULL)
+		{
+			AffichageComplet(personne[indice_personne[i]], indice_personne[i]);
+		}
+		i++;
 	}
 }

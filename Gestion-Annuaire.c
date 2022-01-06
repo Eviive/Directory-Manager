@@ -1,17 +1,5 @@
 // Spécification formelle : Précondition doit être très courte car une fonction fait quelque chose de très précis
 // Interdire les ',' dans les input
-// Enlever les pointeurs dans les fonctions où je n'ai pas besoin de modifier les valeurs (dans ChoixColonne par exemple)
-// en gros partout où il y a "infos * personne"
-// fflush avec la méthode du TP6 si jamais ça marche pas sur un certain OS
-// nombre d'occurrences trouvées (permet d'afficher 0 occurrence trouvée si pas de résultat)
-
-// La recherche et l'affichage des données sur un client à partir de son nom, son prénom et son numéro de téléphone ou son adresse mél (une occurrence car ces couples sont uniques => recherche dichotomique => trié ?)
-// Nom Prénom Tel / Nom Prénom Mail
-// OU
-// Nom Prénom Tel / Mail
-
-// strncasecmp pour les filtres, même chose que strcasecmp sauf que il y a une limite
-// strstr => sous-chaines
 
 #include <stdio.h>
 #include <string.h>
@@ -21,10 +9,9 @@
 #define tableau 5200
 #define taille 70
 
-/***************Split la fonction filtre pour que ce soit plus précis***************/
 int main()
 {
-	unsigned int cpt_ligne = 0, indice_personne[tableau];;
+	unsigned int cpt_ligne = 0, indice_personne[tableau];
 	infos personne[tableau];
 
 	char menu, colonne, recherche, action;
@@ -32,11 +19,11 @@ int main()
 	char str_rech_prenom[taille], str_rech_nom[taille], str_rech_third[taille];
 	int return_recherche;
 
-	clock_t tic, toc;
+	clock_t start, end;
 	/***************Lecture du csv, rempli le tableau de structure***************/
 	Ouverture(personne, indice_personne, &cpt_ligne);
 	/***************Menu***************/
-	Clear();
+	// Clear();
 	do
 	{
 		printf("Bienvenue dans le menu du gestionnaire d'annuaire\n");
@@ -92,14 +79,14 @@ int main()
 						fflush(stdin);
 					}
 					Clear();
-					tic = clock();
+					start = clock();
 					Tri(personne, indice_personne, 0, cpt_ligne);
-					toc = clock();
-					printf("Duree tri : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
-					tic = clock();
+					end = clock();
+					printf("Duree tri : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
+					start = clock();
 					return_recherche = Recherche(personne, indice_personne, cpt_ligne, str_rech_prenom, str_rech_nom, str_rech_third, colonne);
-					toc = clock();
-					printf("\nDuree recherche : %.lf ms\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+					end = clock();
+					printf("\nDuree recherche : %.lf ms\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
 					if (return_recherche != -1)
 					{
 						printf("\n0: Ne rien faire, 1: Modifier ce client, 2: Supprimer ce client\n\nQuelle action souhaitez-vous effectuer : ");
@@ -145,12 +132,12 @@ int main()
 				{
 					if (colonne != 0)
 					{
-						tic = clock();
+						start = clock();
 						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
-						toc = clock();
-						printf("Duree tri : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+						end = clock();
+						printf("Duree tri : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
 					}
-					for (int i = 0; i < cpt_ligne; i++)
+					for (unsigned int i = 0; i < cpt_ligne; i++)
 					{
 						AffichageComplet(personne[indice_personne[i]], indice_personne[i]);
 					}
@@ -196,22 +183,22 @@ int main()
 							}
 						}
 						str_filtre[strlen(str_filtre) - 1] = '\0';
-						tic = clock();
-						Filtre(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre, 2);
-						toc = clock();
-						printf("\nDuree filtre : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+						start = clock();
+						SousChaine(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre);
+						end = clock();
+						printf("\nDuree filtre : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
 						printf("La recherche via le filtre *%s* a ete effectue\n\n", str_filtre);
 					}
 					else if (str_filtre[strlen(str_filtre) - 1] == '*')
 					{
-						tic = clock();
+						start = clock();
 						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
-						toc = clock();
-						printf("Duree tri : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
-						tic = clock();
-						Filtre(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre, 3);
-						toc = clock();
-						printf("\nDuree filtre : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+						end = clock();
+						printf("Duree tri : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
+						start = clock();
+						FiltreTrie(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre);
+						end = clock();
+						printf("\nDuree filtre : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
 						printf("Le recherche via le filtre %s a ete effectue\n\n", str_filtre);
 					}
 					else if (str_filtre[0] == '*')
@@ -220,22 +207,22 @@ int main()
 						{
 							str_filtre[i] = str_filtre[i + 1];
 						}
-						tic = clock();
-						Filtre(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre, 4);
-						toc = clock();
-						printf("\nDuree filtre : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+						start = clock();
+						FinDeChaine(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre);
+						end = clock();
+						printf("\nDuree filtre : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
 						printf("Le recherche via le filtre *%s a ete effectue\n\n", str_filtre);
 					}
 					else
 					{
-						tic = clock();
+						start = clock();
 						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
-						toc = clock();
-						printf("Duree tri : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
-						tic = clock();
-						Filtre(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre, 1);
-						toc = clock();
-						printf("\nDuree filtre : %.lf ms\n\n",((double)(toc - tic) / CLOCKS_PER_SEC) * 1000);
+						end = clock();
+						printf("Duree tri : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
+						start = clock();
+						FiltreTrie(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre);
+						end = clock();
+						printf("\nDuree filtre : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
 						printf("Le recherche via le filtre %s a ete effectue\n\n", str_filtre);
 					}
 				}
