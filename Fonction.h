@@ -13,7 +13,7 @@ typedef struct informations
 void Clear();
 void Pause();
 char * ChoixColonne(infos * personne, int value);
-char * NameColonne(int value);
+char * NomColonne(int value);
 void Ouverture(infos personne[], int indice_personne[], int * cpt_ligne);
 void AffichageComplet(infos personne, int indice);
 void AffichageUnique(char * value);
