@@ -4,9 +4,6 @@
 #include <stdlib.h>
 #include <time.h>
 
-/**
-:postcondition : détermine la commande a effectuer pour clear en fonction de l'OS
-*/
 void Clear()
 {
 	#ifdef _WIN32
@@ -16,9 +13,6 @@ void Clear()
 	#endif
 }
 
-/**
-:postcondition : détermine la commande a effectuer pour effectuer une pause en fonction de l'OS
-*/
 void Pause()
 {
 	#ifdef _WIN32
@@ -31,47 +25,36 @@ void Pause()
 	#endif
 }
 
-/**
-:entrée personne : pointeur d'une structure de type infos
-:entrée value : int
-:pré-condition : value est entre 0 et 6
-:postcondition : renvoie le pointeur d'une des catégorie de la personne
-*/
 char * ChoixColonne(infos * personne, int value)
 {
 	switch (value)
 	{
 	case 0:
-		return (*personne).prenom;
+		return personne->prenom;
 	
 	case 1:
-		return (*personne).nom;
+		return personne->nom;
 
 	case 2:
-		return (*personne).ville;
+		return personne->ville;
 
 	case 3:
-		return (*personne).code_postal;
+		return personne->code_postal;
 
 	case 4:
-		return (*personne).telephone;
+		return personne->telephone;
 
 	case 5:
-		return (*personne).email;
+		return personne->email;
 
 	case 6:
-		return (*personne).metier;
+		return personne->metier;
 
 	default:
 		printf("Erreur switch");
 	}
 }
 
-/**
-:entrée value : int
-:pré-condition : value est entre 0 et 6
-:postcondition : renvoie la chaine de caractères correspondant au nom de la catégorie
-*/
 char * NomColonne(int value)
 {
 	switch (value)
@@ -102,21 +85,13 @@ char * NomColonne(int value)
 	}
 }
 
-/**
-:entrée personne : tableau de structures de type infos
-:entrée indice_personne : tableau d'int
-:entrée cpt_ligne : pointeur d'int
-:pré-condition : cpt_ligne égal 0
-:postcondition : lit l'annuaire, stock toutes les informations dans le tableau de structures infos, cpt_ligne est égal au nombre de personne
-*/
 void Ouverture(infos personne[], int indice_personne[], int * cpt_ligne)
 {
-	char ligne[300]; //chemin_annuaire[100];
+	char ligne[300], chemin_annuaire[100];
 	int cpt_char = 0, cpt_virgule = 0, cpt_var = 0;
 
-	// printf("Saisir le chemin d'acces a l'annuaire : ");
-	// scanf("%s", &chemin_annuaire);
-	// fflush(stdin);
+	printf("Saisir le chemin d'acces a l'annuaire : ");
+	Saisi(chemin_annuaire, sizeof(chemin_annuaire));
 
 	/****************Lecture du fichier****************/
 	FILE * annuaire_file = fopen(chemin_annuaire, "r");
@@ -151,12 +126,6 @@ void Ouverture(infos personne[], int indice_personne[], int * cpt_ligne)
 	fclose(annuaire_file);
 }
 
-/**
-:entrée personne : structure de type infos
-:entrée indice : int
-:pré-condition : indice égal à l'indice de la personne dans l'annuaire
-:postcondition : affiche toutes les informations sur la personne
-*/
 void AffichageComplet(infos personne, int indice)
 {
 	int i, taille_aff;
@@ -198,10 +167,6 @@ void AffichageComplet(infos personne, int indice)
 	printf("%*.*s\n", -taille_aff, taille_aff, ChoixColonne(&personne, i));
 }
 
-/**
-:entrée value : pointeur de char
-:postcondition : affiche la valeur d'entrée si elle est non-nul, sinon affiche N/A
-*/
 void AffichageUnique(char * value)
 {
 	if (strlen(value) != 0 )
@@ -214,50 +179,58 @@ void AffichageUnique(char * value)
 	}
 }
 
-/**
-:entrée personne : pointeur de structure de type infos
-:entrée indice_personne : tableau d'int
-:entrée cpt_ligne : pointeur d'int
-:postcondition : ajoute une personne à la dernière ligne de l'annuaire
-*/
+void Saisi(char * value, unsigned int size)
+{
+	fgets(value, size, stdin);
+	fflush(stdin);
+	for (int i = 0; i < strlen(value); i++)
+	{
+		if (value[i] == ',')
+		{
+			value[i] = ' ';
+		}
+		else if (value[i] == '\n')
+		{
+			value[i] = '\0';
+		}
+	}
+}
+
 void Ajout(infos * personne, int indice_personne[], int * cpt_ligne)
 {
+	unsigned int size;
 	Clear();
 	for (int i = 0; i <= 6; i++)
 	{
 		printf("Saisir %s : ", NomColonne(i));
-		scanf("%s", ChoixColonne(personne, i));
-		fflush(stdin);
+		if (i == 3)
+		{
+			size = taille_code_postal;
+		}
+		else if (i == 4)
+		{
+			size = taille_telephone;
+		}
+		else
+		{
+			size = taille;
+		}
+		Saisi(ChoixColonne(personne, i), size);
 	}
 	indice_personne[(*cpt_ligne)] = (*cpt_ligne);
 	(*cpt_ligne)++;
 }
 
-/**
-:entrée personne : tableau de structures de type infos
-:entrée indice_personne : tableau d'int
-:entrée cpt_ligne : pointeur d'int
-:entrée nb_suppression : int
-:pré-condition : nb_suppression égal à l'indice de la personne à supprimer
-:postcondition : décale toutes les personnes après l'indice passé en paramètre, permet d'écraser la personne à supprimer
-*/
 void Suppression(infos personne[], int indice_personne[], int * cpt_ligne, int nb_suppression)
 {
-	for (int i = nb_suppression; i < *(cpt_ligne) - 1; i++)
-	{
-		personne[indice_personne[i]] = personne[indice_personne[i + 1]];
-	}
+	personne[indice_personne[nb_suppression]] = personne[*(cpt_ligne) - 1];
 	(*cpt_ligne)--;
 }
 
-/**
-:entrée/sortie personne : pointeur de structure de type infos
-:pré-condition : personne est la structure à modifier
-:postcondition : modifie une des valeurs de la structure passé en entrée
-*/
 void Modif(infos * personne)
 {
-	char nb_col;
+	int nb_col;
+	unsigned int size = taille;
 	printf("\n1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n(0 pour quitter)\n\nSaisissez le numero de la colonne a modifier : ");
 	scanf("%d", &nb_col);
 	fflush(stdin);
@@ -266,8 +239,15 @@ void Modif(infos * personne)
 		printf("\nValeur actuelle : ");
 		AffichageUnique(ChoixColonne(personne, nb_col-1));
 		printf("Saisir la nouvelle valeur : ");
-		scanf("%s", ChoixColonne(personne, nb_col-1));
-		fflush(stdin);
+		if (nb_col - 1 == 3)
+		{
+			size = taille_code_postal;
+		}
+		else if (nb_col - 1 == 4)
+		{
+			size = taille_telephone;
+		}
+		Saisi(ChoixColonne(personne, nb_col-1), size);
 		printf("\n");
 	}
 	else if (nb_col != 0)
@@ -276,12 +256,6 @@ void Modif(infos * personne)
 	}
 }
 
-/**
-:entrée personne : tableau de structures de type infos
-:entrée indice_personne : tableau d'int
-:entrée cpt_ligne : int
-:postcondition : Affiche les données sur une personne si la fonction DonneeEmpty renvoie 1
-*/
 void DonneeManquante(infos personne[], int indice_personne[], int cpt_ligne)
 {
 	int indice = 0, cpt_clientvide = 0;
@@ -296,10 +270,6 @@ void DonneeManquante(infos personne[], int indice_personne[], int cpt_ligne)
 	printf("\nIl y a %d clients ayant au moins une case vide\n\n", cpt_clientvide);
 }
 
-/**
-:entrée personne : structure de type infos
-:postcondition : renvoie 1 si une des chaines de caractères de la structure est vide, sinon renvoie 0
-*/
 char DonneeEmpty(infos personne)
 {
 	for (int i = 0; i <= 6; i++)
@@ -312,12 +282,6 @@ char DonneeEmpty(infos personne)
 	return 0;
 }
 
-/**
-:entrée personne : tableau de structures de type infos
-:entrée indice_personne : tableau d'int
-:entrée cpt_ligne : int
-:postcondition : écrit dans un fichier de sauvegarde le contenu de chaque structure sur une ligne
-*/
 void Sauvegarde(infos personne[], int indice_personne[], int cpt_ligne)
 {
 	printf("Creation du fichier de sauvegarde\n\n");
@@ -340,14 +304,6 @@ void Sauvegarde(infos personne[], int indice_personne[], int cpt_ligne)
 	printf("Sauvegarde effectue (annuaire_sauvegarde.csv)\n\n");
 }
 
-/**
-:entrée personne : tableau de structures de type infos
-:entrée indice_personne : tableau d'int
-:entrée cpt_ligne : int
-:entrée nb_colonne : unsigned int
-:pré-condition : nb_colonne entre 0 et 6
-:postcondition : tri le tableau selon la colonne passé en paramètre
-*/
 void Tri(infos personne[], int indice_personne[], unsigned int nb_colonne, int cpt_ligne)
 {
 	clock_t start = clock();
@@ -368,15 +324,6 @@ void Tri(infos personne[], int indice_personne[], unsigned int nb_colonne, int c
 	printf("Duree tri : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
 }
 
-/**
-:entrée personne : tableau de structures de type infos
-:entrée indice_personne : tableau d'int
-:entrée cpt_ligne : int
-:entrée str_prenom, str_nom, str_third : tableau de caractères
-:entrée nb_colonne : unsigned int
-:pré-condition : nb_colonne entre 0 et 6
-:postcondition : renvoie l'indice de la personne si elle est trouvée dans le tableau de structure, sinon renvoie -1
-*/
 int Recherche(infos personne[], int indice_personne[], int cpt_ligne, char str_prenom[], char str_nom[], char str_third[], unsigned int nb_colonne)
 {
 	clock_t start = clock(), end;
@@ -401,15 +348,6 @@ int Recherche(infos personne[], int indice_personne[], int cpt_ligne, char str_p
 	return -1;
 }
 
-/**
-:entrée personne : tableau de structures de type infos
-:entrée indice_personne : tableau d'int
-:entrée cpt_ligne : pointeur d'int
-:entrée nb_colonne : unsigned int
-:entrée str_filtre : tableau de caractères
-:pré-condition : nb_colonne entre 0 et 6
-:postcondition : effectue une recherche filtrée triée ("contient" et "début de chaine") et affiche les données des occurences trouvées
-*/
 void FiltreTrie(infos personne[], int indice_personne[], int cpt_ligne, unsigned int nb_colonne, char str_filtre[])
 {
 	clock_t start = clock();
@@ -442,15 +380,6 @@ void FiltreTrie(infos personne[], int indice_personne[], int cpt_ligne, unsigned
 	printf("\nDuree filtre : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
 }
 
-/**
-:entrée personne : tableau de structures de type infos
-:entrée indice_personne : tableau d'int
-:entrée cpt_ligne : pointeur d'int
-:entrée nb_colonne : unsigned int
-:entrée str_filtre : tableau de caractères
-:pré-condition : nb_colonne entre 0 et 6
-:postcondition : effectue une recherche filtrée ("fin de chaine") et affiche les données des occurences trouvées
-*/
 void FinDeChaine(infos personne[], int indice_personne[], int cpt_ligne, unsigned int nb_colonne, char str_filtre[])
 {
 	clock_t start = clock();
@@ -474,15 +403,6 @@ void FinDeChaine(infos personne[], int indice_personne[], int cpt_ligne, unsigne
 	printf("\nDuree filtre : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
 }
 
-/**
-:entrée personne : tableau de structures de type infos
-:entrée indice_personne : tableau d'int
-:entrée cpt_ligne : pointeur d'int
-:entrée nb_colonne : unsigned int
-:entrée str_filtre : tableau de caractères
-:pré-condition : nb_colonne entre 0 et 6
-:postcondition : effectue une recherche filtrée ("sous-chaine") et affiche les données des occurences trouvées
-*/
 void SousChaine(infos personne[], int indice_personne[], int cpt_ligne, unsigned int nb_colonne, char str_filtre[])
 {
 	clock_t start = clock();

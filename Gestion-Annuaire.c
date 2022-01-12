@@ -1,9 +1,3 @@
-// Spécification formelle : Précondition doit être très courte car une fonction fait quelque chose de très précis
-// Problème :
-// 		Je peux pas rechercher des trucs avec des espaces
-//		Stocker dans une variable l'état du tri pour ne pas être obligé de retrier à chaque fois que je fais une recherche
-// Interdire les ',' dans les input
-
 #include "Fonction.h"
 #include <stdio.h>
 #include <string.h>
@@ -23,7 +17,7 @@ int main()
 	/***************Lecture du csv, rempli le tableau de structure***************/
 	Ouverture(personne, indice_personne, &cpt_ligne);
 	/***************Menu***************/
-	// Clear();
+	Clear();
 	do
 	{
 		printf("Bienvenue dans le menu du gestionnaire d'annuaire\n");
@@ -33,7 +27,7 @@ int main()
 		printf("\t-Saisir 4 pour rechercher des clients via un filtre\n");
 		printf("\t-Saisir 5 pour afficher les clients avec des donnees manquantes\n");
 		printf("\t-Saisir 6 pour sauvegarder l'annuaire\n");
-		printf("\t-Saisir 7 pour quitter\n");
+		printf("\t-Saisir 7 pour quitter\n> ");
 		scanf("%d", &menu);
 		fflush(stdin);
 		if (menu >= 1 && menu <= 6)
@@ -59,24 +53,20 @@ int main()
 				if (recherche == 1 || recherche == 2)
 				{
 					printf("Saisir le prenom a rechercher : ");
-					scanf("%s", &str_rech_prenom);
-					fflush(stdin);
+					Saisi(str_rech_prenom, taille);
 					printf("Saisir le nom a rechercher : ");
-					scanf("%s", &str_rech_nom);
-					fflush(stdin);
+					Saisi(str_rech_nom, taille);
 					if (recherche == 1)
 					{
 						colonne = 5;
 						printf("Saisir l'email a rechercher : ");
-						scanf("%s", &str_rech_third);
-						fflush(stdin);
+						Saisi(str_rech_third, taille);
 					}
 					else
 					{
 						colonne = 4;
 						printf("Saisir le telephone a rechercher : ");
-						scanf("%s", &str_rech_third);
-						fflush(stdin);
+						Saisi(str_rech_third, taille_telephone);
 					}
 					Clear();
 					Tri(personne, indice_personne, 0, cpt_ligne);
@@ -132,10 +122,17 @@ int main()
 					if (colonne != 0)
 					{
 						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
+						for (unsigned int i = 0; i < cpt_ligne; i++)
+						{
+							AffichageComplet(personne[indice_personne[i]], indice_personne[i]);
+						}
 					}
-					for (unsigned int i = 0; i < cpt_ligne; i++)
+					else
 					{
-						AffichageComplet(personne[indice_personne[i]], indice_personne[i]);
+						for (unsigned int i = 0; i < cpt_ligne; i++)
+						{
+							AffichageComplet(personne[i], i);
+						}
 					}
 					printf("\nL'affichage de l'annuaire a ete effectue\n\n");
 				}
@@ -159,8 +156,7 @@ int main()
 					do
 					{
 						printf("Chaine exacte : chaine\nCommence par : chaine*\nFini par : *chaine\nSous-chaine : *chaine*\n\nSaisir la valeur qui servira de filtre : ");
-						scanf("%s", &str_filtre);
-						fflush(stdin);
+						Saisi(str_filtre, taille);
 					}
 					while (strlen(str_filtre) == 0);
 					Clear();
@@ -242,28 +238,3 @@ int main()
 	while (menu != 7);
 	return 0;
 }
-
-// lister les tris existant et les références de où on les a trouvés
-// le choix peut dépendre de théorique => complexité théorique
-// 							 pratique => implémentation facile
-// il faut trouver le juste milieu
-
-// présentation succinte, afficher la complexité sans explication des calculs (dire où on l'a trouvé)
-
-// tri fusion : complexité quadratique, très efficace mais pas adapté pour les tableaux car cela nécessite de dupliquer le tableau
-// plus adapter pour les liste
-
-// lister les diff tris possible, les regrouper par classe suivant les avantages et inconvénients
-// les éliminer peu à peu
-
-// présentation courte => le principe (1 phrase), complexité théorique
-
-// Recherche dichotomique : complexité logarithmique
-// Tri par sélection : complexité taille²
-// Recherche linéaire : O de n
-
-
-
-// 2ème rapport : 1er rapport + le programme C
-// comparaison théorique des choix
-// exécuter les deux prog et comparer les benchmarks
