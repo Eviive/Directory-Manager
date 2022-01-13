@@ -51,7 +51,8 @@ char * ChoixColonne(infos * personne, int value)
 		return personne->metier;
 
 	default:
-		printf("Erreur switch");
+		printf("Erreur switch ChoixColonne");
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -81,11 +82,12 @@ char * NomColonne(int value)
 		return "le metier";
 
 	default:
-		printf("Erreur switch");
+		printf("Erreur switch NomColonne");
+		exit(EXIT_FAILURE);
 	}
 }
 
-void Ouverture(infos personne[], int indice_personne[], int * cpt_ligne)
+void Ouverture(infos personne[], unsigned int indice_personne[], unsigned int * cpt_ligne)
 {
 	char ligne[300], chemin_annuaire[100];
 	int cpt_char = 0, cpt_virgule = 0, cpt_var = 0;
@@ -159,7 +161,7 @@ void AffichageComplet(infos personne, int indice)
 			break;
 
 		default:
-			printf("Erreur switch");
+			printf("Erreur switch AffichageComplet");
 		}
 		printf("%*.*s | ", -taille_aff, taille_aff, ChoixColonne(&personne, i));
 	}
@@ -196,7 +198,7 @@ void Saisi(char * value, unsigned int size)
 	}
 }
 
-void Ajout(infos * personne, int indice_personne[], int * cpt_ligne)
+void Ajout(infos * personne, unsigned int indice_personne[], unsigned int * cpt_ligne)
 {
 	unsigned int size;
 	Clear();
@@ -221,7 +223,7 @@ void Ajout(infos * personne, int indice_personne[], int * cpt_ligne)
 	(*cpt_ligne)++;
 }
 
-void Suppression(infos personne[], int indice_personne[], int * cpt_ligne, int nb_suppression)
+void Suppression(infos personne[], unsigned int indice_personne[], unsigned int * cpt_ligne, int nb_suppression)
 {
 	personne[indice_personne[nb_suppression]] = personne[*(cpt_ligne) - 1];
 	(*cpt_ligne)--;
@@ -256,7 +258,7 @@ void Modif(infos * personne)
 	}
 }
 
-void DonneeManquante(infos personne[], int indice_personne[], int cpt_ligne)
+void DonneeManquante(infos personne[], unsigned int indice_personne[], unsigned int cpt_ligne)
 {
 	int indice = 0, cpt_clientvide = 0;
 	for (indice = 0; indice <= cpt_ligne; indice++)
@@ -282,7 +284,7 @@ char DonneeEmpty(infos personne)
 	return 0;
 }
 
-void Sauvegarde(infos personne[], int indice_personne[], int cpt_ligne)
+void Sauvegarde(infos personne[], unsigned int indice_personne[], unsigned int cpt_ligne)
 {
 	printf("Creation du fichier de sauvegarde\n\n");
 	FILE * save_file = fopen(chemin_annuaire_sauvegarde, "w");
@@ -291,20 +293,30 @@ void Sauvegarde(infos personne[], int indice_personne[], int cpt_ligne)
 		printf("Echec creation du fichier de sauvegarde\n");
 		exit(EXIT_FAILURE);
 	}
+	int j;
 	for (int i = 0; i <= cpt_ligne; i++)
 	{
-		int j = 0;
-		for (j; j <= 5; j++)
+		j = 0;
+		while(j <= 5)
 		{
-			fprintf(save_file, "%s,", ChoixColonne(&personne[indice_personne[i]], j));
+			if (fprintf(save_file, "%s,", ChoixColonne(&personne[indice_personne[i]], j)) == 0)
+			{
+				printf("Echec de l'ecriture dans la sauvegarde\n\n");
+				exit(EXIT_FAILURE);
+			}
+			j++;
 		}
-		fprintf(save_file, "%s\n", ChoixColonne(&personne[indice_personne[i]], j));
+		if (fprintf(save_file, "%s\n", ChoixColonne(&personne[indice_personne[i]], j)) == 0)
+		{
+			printf("Echec de l'ecriture dans la derniere colonne de la sauvegarde\n\n");
+			exit(EXIT_FAILURE);
+		}
 	}
 	fclose(save_file);
 	printf("Sauvegarde effectue (annuaire_sauvegarde.csv)\n\n");
 }
 
-void Tri(infos personne[], int indice_personne[], unsigned int nb_colonne, int cpt_ligne)
+void Tri(infos personne[], unsigned int indice_personne[], unsigned int nb_colonne, unsigned int cpt_ligne)
 {
 	clock_t start = clock();
 	int i = 1, j, petit;
@@ -324,7 +336,7 @@ void Tri(infos personne[], int indice_personne[], unsigned int nb_colonne, int c
 	printf("Duree tri : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
 }
 
-int Recherche(infos personne[], int indice_personne[], int cpt_ligne, char str_prenom[], char str_nom[], char str_third[], unsigned int nb_colonne)
+int Recherche(infos personne[], unsigned int indice_personne[], unsigned int cpt_ligne, char str_prenom[], char str_nom[], char str_third[], unsigned int nb_colonne)
 {
 	clock_t start = clock(), end;
 	int i = 0;
@@ -348,7 +360,7 @@ int Recherche(infos personne[], int indice_personne[], int cpt_ligne, char str_p
 	return -1;
 }
 
-void FiltreTrie(infos personne[], int indice_personne[], int cpt_ligne, unsigned int nb_colonne, char str_filtre[])
+void FiltreTrie(infos personne[], unsigned int indice_personne[], unsigned int cpt_ligne, unsigned int nb_colonne, char str_filtre[])
 {
 	clock_t start = clock();
 	int i = 0;
@@ -380,10 +392,10 @@ void FiltreTrie(infos personne[], int indice_personne[], int cpt_ligne, unsigned
 	printf("\nDuree filtre : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
 }
 
-void FinDeChaine(infos personne[], int indice_personne[], int cpt_ligne, unsigned int nb_colonne, char str_filtre[])
+void FinDeChaine(infos personne[], unsigned int indice_personne[], unsigned int cpt_ligne, unsigned int nb_colonne, char str_filtre[])
 {
 	clock_t start = clock();
-	int i = 0, j;
+	int i = 0;
 	while (i < cpt_ligne)
 	{
 		int diff;
@@ -403,7 +415,7 @@ void FinDeChaine(infos personne[], int indice_personne[], int cpt_ligne, unsigne
 	printf("\nDuree filtre : %.lf ms\n\n",((double)(end - start) / CLOCKS_PER_SEC) * 1000);
 }
 
-void SousChaine(infos personne[], int indice_personne[], int cpt_ligne, unsigned int nb_colonne, char str_filtre[])
+void SousChaine(infos personne[], unsigned int indice_personne[], unsigned int cpt_ligne, unsigned int nb_colonne, char str_filtre[])
 {
 	clock_t start = clock();
 	int i = 0;

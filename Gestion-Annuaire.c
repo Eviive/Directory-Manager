@@ -10,10 +10,11 @@ int main()
 	unsigned int cpt_ligne = 0, indice_personne[tableau];
 	infos personne[tableau];
 
-	char menu, colonne, recherche, action;
+	int colonne;
+	char menu, recherche, action;
 	char str_filtre[taille];
 	char str_rech_prenom[taille], str_rech_nom[taille], str_rech_third[taille];
-	int return_recherche;
+	unsigned int return_recherche;
 	/***************Lecture du csv, rempli le tableau de structure***************/
 	Ouverture(personne, indice_personne, &cpt_ligne);
 	/***************Menu***************/
@@ -21,21 +22,21 @@ int main()
 	do
 	{
 		printf("Bienvenue dans le menu du gestionnaire d'annuaire\n");
-		printf("\t-Saisir 1 pour ajouter un client\n");
-		printf("\t-Saisir 2 pour effectuer une recherche\n");
-		printf("\t-Saisir 3 pour afficher le contenu de l'annuaire\n");
-		printf("\t-Saisir 4 pour rechercher des clients via un filtre\n");
-		printf("\t-Saisir 5 pour afficher les clients avec des donnees manquantes\n");
-		printf("\t-Saisir 6 pour sauvegarder l'annuaire\n");
-		printf("\t-Saisir 7 pour quitter\n> ");
-		scanf("%d", &menu);
+		printf("\t1- ajouter un client\n");
+		printf("\t2- effectuer une recherche\n");
+		printf("\t3- afficher le contenu de l'annuaire\n");
+		printf("\t4- rechercher des clients via un filtre\n");
+		printf("\t5- afficher les clients avec des donnees manquantes\n");
+		printf("\t6- sauvegarder l'annuaire\n");
+		printf("\t7- quitter\n> ");
+		scanf("%c", &menu);
 		fflush(stdin);
-		if (menu >= 1 && menu <= 6)
+		if (menu >= '1' && menu <= '6')
 		{
 			switch (menu)
 			{
 			/***************Ajout***************/
-			case 1:
+			case '1':
 				Clear();
 				Ajout(&personne[cpt_ligne], indice_personne, &cpt_ligne);
 				printf("\n");
@@ -44,19 +45,19 @@ int main()
 				break;
 
 			/***************Recherche***************/
-			case 2:
+			case '2':
 				Clear();
 				printf("1: Prenom / Nom / Email, 2: Prenom / Nom / Telephone\n(0 pour quitter)\n\nSaisir le triplet a rechercher : ");
-				scanf("%d", &recherche);
+				scanf("%c", &recherche);
 				fflush(stdin);
 				printf("\n");
-				if (recherche == 1 || recherche == 2)
+				if (recherche == '1' || recherche == '2')
 				{
 					printf("Saisir le prenom a rechercher : ");
 					Saisi(str_rech_prenom, taille);
 					printf("Saisir le nom a rechercher : ");
 					Saisi(str_rech_nom, taille);
-					if (recherche == 1)
+					if (recherche == '1')
 					{
 						colonne = 5;
 						printf("Saisir l'email a rechercher : ");
@@ -74,20 +75,20 @@ int main()
 					if (return_recherche != -1)
 					{
 						printf("\n0: Ne rien faire, 1: Modifier ce client, 2: Supprimer ce client\n\nQuelle action souhaitez-vous effectuer : ");
-						scanf("%d", &action);
+						scanf("%c", &action);
 						fflush(stdin);
-						if (action == 1)
+						if (action == '1')
 						{
 							Clear();
 							AffichageComplet(personne[indice_personne[return_recherche]], indice_personne[return_recherche]);
 							Modif(&personne[indice_personne[return_recherche]]);
 						}
-						else if (action == 2)
+						else if (action == '2')
 						{
 							printf("\n");
 							Suppression(personne, indice_personne, &cpt_ligne, return_recherche);
 						}
-						else if (action == 0)
+						else if (action == '0')
 						{
 							printf("\n");
 						}
@@ -102,7 +103,7 @@ int main()
 						printf("\nAucune correspondance n'a ete trouvee\n\n");
 					}
 				}
-				else if (recherche != 0)
+				else if (recherche != '0')
 				{
 					printf("Erreur de saisie\n\n");
 				}
@@ -111,7 +112,7 @@ int main()
 				break;
 
 			/***************Afficher l'annuaire***************/
-			case 3:
+			case '3':
 				Clear();
 				printf("0: Ne pas trier, 1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n\nQuelle colonne souhaitez-vous trier avant d'afficher l'annuaire : ");
 				scanf("%d", &colonne);
@@ -145,7 +146,7 @@ int main()
 				break;
 
 			/***************Filtre***************/
-			case 4:
+			case '4':
 				Clear();
 				printf("1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n(0 pour quitter)\n\nSaisir le numero de la colonne a filtrer : ");
 				scanf("%d", &colonne);
@@ -209,7 +210,7 @@ int main()
 				break;
 
 			/***************Données manquantes***************/
-			case 5:
+			case '5':
 				Clear();
 				DonneeManquante(personne, indice_personne, cpt_ligne - 1);
 				Pause();
@@ -217,7 +218,7 @@ int main()
 				break;
 
 			/***************Sauvegarde***************/
-			case 6:
+			case '6':
 				Clear();
 				Sauvegarde(personne, indice_personne, cpt_ligne - 1);
 				Pause();
@@ -225,16 +226,16 @@ int main()
 				break;
 
 			default:
-				printf("Erreur switch");
+				printf("Erreur switch Menu");
 			}
 		}
-		else if (menu < 1 || menu > 7)
+		else if (menu < '1' || menu > '7')
 		{
 			printf("\nErreur de saisie\n\n");
 			Pause();
 			Clear();
 		}
 	}
-	while (menu != 7);
+	while (menu != '7');
 	return 0;
 }
