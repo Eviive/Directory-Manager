@@ -1,4 +1,4 @@
-// #define chemin_annuaire "annuaire_test.csv"
+// #define chemin_annuaire "annuaire_test.csv" // plus simple pour debug
 #define chemin_annuaire_sauvegarde "annuaire_sauvegarde.csv"
 
 #define taille 70
@@ -96,7 +96,7 @@ void Modif(infos * personne);
 :entrée cpt_ligne : unsigned int
 :postcondition : Affiche les données sur une personne si la fonction DonneeEmpty renvoie 1
 */
-void DonneeManquante(infos personne[], unsigned int indice_personne[], unsigned int cpt_ligne);
+void DonneeManquante(infos personne[], unsigned int cpt_ligne);
 
 /**
 :entrée personne : structure de type infos

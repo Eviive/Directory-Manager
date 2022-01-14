@@ -9,9 +9,9 @@ int main()
 {
 	unsigned int cpt_ligne = 0, indice_personne[tableau];
 	infos personne[tableau];
-
-	int colonne;
-	char menu, recherche, action;
+	
+	int colonne, current_tri = -1;
+	char menu, recherche, rech_action;
 	char str_filtre[taille];
 	char str_rech_prenom[taille], str_rech_nom[taille], str_rech_third[taille];
 	unsigned int return_recherche;
@@ -39,6 +39,7 @@ int main()
 			case '1':
 				Clear();
 				Ajout(&personne[cpt_ligne], indice_personne, &cpt_ligne);
+				current_tri = -1;
 				printf("\n");
 				Pause();
 				Clear();
@@ -70,25 +71,30 @@ int main()
 						Saisi(str_rech_third, taille_telephone);
 					}
 					Clear();
-					Tri(personne, indice_personne, 0, cpt_ligne);
+					if (current_tri != 0)
+					{
+						Tri(personne, indice_personne, 0, cpt_ligne);
+						current_tri = 0;
+					}
 					return_recherche = Recherche(personne, indice_personne, cpt_ligne, str_rech_prenom, str_rech_nom, str_rech_third, colonne);
 					if (return_recherche != -1)
 					{
 						printf("\n0: Ne rien faire, 1: Modifier ce client, 2: Supprimer ce client\n\nQuelle action souhaitez-vous effectuer : ");
-						scanf("%c", &action);
+						scanf("%c", &rech_action);
 						fflush(stdin);
-						if (action == '1')
+						if (rech_action == '1')
 						{
 							Clear();
 							AffichageComplet(personne[indice_personne[return_recherche]], indice_personne[return_recherche]);
 							Modif(&personne[indice_personne[return_recherche]]);
 						}
-						else if (action == '2')
+						else if (rech_action == '2')
 						{
 							printf("\n");
 							Suppression(personne, indice_personne, &cpt_ligne, return_recherche);
+							current_tri = -1;
 						}
-						else if (action == '0')
+						else if (rech_action == '0')
 						{
 							printf("\n");
 						}
@@ -114,7 +120,12 @@ int main()
 			/***************Afficher l'annuaire***************/
 			case '3':
 				Clear();
-				printf("0: Ne pas trier, 1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n\nQuelle colonne souhaitez-vous trier avant d'afficher l'annuaire : ");
+				for (int i = 0; i < 7; i++)
+				{
+					printf("%d: %s, ", i, NomColonne(i));
+				}
+				printf("7: %s\n\n", NomColonne(7));
+				printf("Quelle colonne souhaitez-vous trier avant d'afficher l'annuaire : ");
 				scanf("%d", &colonne);
 				fflush(stdin);
 				printf("\n");
@@ -122,7 +133,11 @@ int main()
 				{
 					if (colonne != 0)
 					{
-						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
+						if (current_tri != colonne - 1)
+						{
+							Tri(personne, indice_personne, colonne - 1, cpt_ligne);
+							current_tri = colonne - 1;
+						}
 						for (unsigned int i = 0; i < cpt_ligne; i++)
 						{
 							AffichageComplet(personne[indice_personne[i]], indice_personne[i]);
@@ -148,7 +163,12 @@ int main()
 			/***************Filtre***************/
 			case '4':
 				Clear();
-				printf("1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n(0 pour quitter)\n\nSaisir le numero de la colonne a filtrer : ");
+				for (int i = 1; i < 7; i++)
+				{
+					printf("%d: %s, ", i, NomColonne(i));
+				}
+				printf("7: %s\n", NomColonne(7));
+				printf("(0 pour quitter)\n\nSaisir le numero de la colonne a filtrer : ");
 				scanf("%d", &colonne);
 				fflush(stdin);
 				printf("\n");
@@ -181,7 +201,11 @@ int main()
 					}
 					else if (str_filtre[strlen(str_filtre) - 1] == '*')
 					{
-						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
+						if (current_tri != colonne - 1)
+						{
+							Tri(personne, indice_personne, colonne - 1, cpt_ligne);
+							current_tri = colonne - 1;
+						}
 						FiltreTrie(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre);
 						printf("Le recherche via le filtre %s a ete effectue\n\n", str_filtre);
 					}
@@ -196,7 +220,11 @@ int main()
 					}
 					else
 					{
-						Tri(personne, indice_personne, colonne - 1, cpt_ligne);
+						if (current_tri != colonne - 1)
+						{
+							Tri(personne, indice_personne, colonne - 1, cpt_ligne);
+							current_tri = colonne - 1;
+						}
 						FiltreTrie(personne, indice_personne, cpt_ligne, colonne - 1, str_filtre);
 						printf("Le recherche via le filtre %s a ete effectue\n\n", str_filtre);
 					}
@@ -212,7 +240,7 @@ int main()
 			/***************Données manquantes***************/
 			case '5':
 				Clear();
-				DonneeManquante(personne, indice_personne, cpt_ligne - 1);
+				DonneeManquante(personne, cpt_ligne - 1);
 				Pause();
 				Clear();
 				break;

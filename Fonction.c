@@ -61,25 +61,28 @@ char * NomColonne(int value)
 	switch (value)
 	{
 	case 0:
-		return "le prenom";
+		return "ne pas trier";
 
 	case 1:
-		return "le nom";
+		return "prenom";
 
 	case 2:
-		return "la ville";
+		return "nom";
 
 	case 3:
-		return "le code postal";
+		return "ville";
 
 	case 4:
-		return "le numero de telephone";
+		return "code postal";
 
 	case 5:
-		return "l'email";
+		return "numero de telephone";
 
 	case 6:
-		return "le metier";
+		return "email";
+
+	case 7:
+		return "metier";
 
 	default:
 		printf("Erreur switch NomColonne");
@@ -204,7 +207,7 @@ void Ajout(infos * personne, unsigned int indice_personne[], unsigned int * cpt_
 	Clear();
 	for (int i = 0; i <= 6; i++)
 	{
-		printf("Saisir %s : ", NomColonne(i));
+		printf("Entrer [%s] : ", NomColonne(i + 1));
 		if (i == 3)
 		{
 			size = taille_code_postal;
@@ -225,7 +228,10 @@ void Ajout(infos * personne, unsigned int indice_personne[], unsigned int * cpt_
 
 void Suppression(infos personne[], unsigned int indice_personne[], unsigned int * cpt_ligne, int nb_suppression)
 {
-	personne[indice_personne[nb_suppression]] = personne[*(cpt_ligne) - 1];
+	for (int i = nb_suppression; i < *(cpt_ligne) - 1; i++)
+	{
+		personne[indice_personne[i]] = personne[indice_personne[i + 1]];
+	}
 	(*cpt_ligne)--;
 }
 
@@ -233,7 +239,13 @@ void Modif(infos * personne)
 {
 	int nb_col;
 	unsigned int size = taille;
-	printf("\n1: Prenom, 2: Nom, 3: Ville, 4: Code postal, 5: Telephone, 6: Email, 7: Metier\n(0 pour quitter)\n\nSaisissez le numero de la colonne a modifier : ");
+	printf("\n");
+	for (int i = 1; i < 7; i++)
+	{
+		printf("%d: %s, ", i, NomColonne(i));
+	}
+	printf("7: %s\n", NomColonne(7));
+	printf("(0 pour quitter)\n\nSaisissez le numero de la colonne a modifier : ");
 	scanf("%d", &nb_col);
 	fflush(stdin);
 	if (nb_col >= 1 && nb_col <= 7)
@@ -258,18 +270,18 @@ void Modif(infos * personne)
 	}
 }
 
-void DonneeManquante(infos personne[], unsigned int indice_personne[], unsigned int cpt_ligne)
+void DonneeManquante(infos personne[], unsigned int cpt_ligne)
 {
 	int indice = 0, cpt_clientvide = 0;
 	for (indice = 0; indice <= cpt_ligne; indice++)
 	{
-		if (DonneeEmpty(personne[indice_personne[indice]]) == 1)
+		if (DonneeEmpty(personne[indice]) == 1)
 		{
 			cpt_clientvide++;
-			AffichageComplet(personne[indice_personne[indice]], indice_personne[indice]);
+			AffichageComplet(personne[indice], indice);
 		}
 	}
-	printf("\nIl y a %d clients ayant au moins une case vide\n\n", cpt_clientvide);
+	printf("\nIl y a %d clients ayant au moins une case vide (%.1f%%)\n\n", cpt_clientvide, (cpt_clientvide * 100.) / cpt_ligne);
 }
 
 char DonneeEmpty(infos personne)
