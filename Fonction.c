@@ -296,7 +296,7 @@ char DonneeEmpty(infos personne)
 	return 0;
 }
 
-void Sauvegarde(infos personne[], unsigned int indice_personne[], unsigned int cpt_ligne)
+void Sauvegarde(infos personne[], unsigned int cpt_ligne)
 {
 	printf("Creation du fichier de sauvegarde\n\n");
 	FILE * save_file = fopen(chemin_annuaire_sauvegarde, "w");
@@ -311,14 +311,14 @@ void Sauvegarde(infos personne[], unsigned int indice_personne[], unsigned int c
 		j = 0;
 		while(j <= 5)
 		{
-			if (fprintf(save_file, "%s,", ChoixColonne(&personne[indice_personne[i]], j)) == 0)
+			if (fprintf(save_file, "%s,", ChoixColonne(&personne[i], j)) == 0)
 			{
 				printf("Echec de l'ecriture dans la sauvegarde\n\n");
 				exit(EXIT_FAILURE);
 			}
 			j++;
 		}
-		if (fprintf(save_file, "%s\n", ChoixColonne(&personne[indice_personne[i]], j)) == 0)
+		if (fprintf(save_file, "%s\n", ChoixColonne(&personne[i], j)) == 0)
 		{
 			printf("Echec de l'ecriture dans la derniere colonne de la sauvegarde\n\n");
 			exit(EXIT_FAILURE);

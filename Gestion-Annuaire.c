@@ -248,7 +248,7 @@ int main()
 			/***************Sauvegarde***************/
 			case '6':
 				Clear();
-				Sauvegarde(personne, indice_personne, cpt_ligne - 1);
+				Sauvegarde(personne, cpt_ligne - 1);
 				Pause();
 				Clear();
 				break;

@@ -110,7 +110,7 @@ char DonneeEmpty(infos personne);
 :entrée cpt_ligne : unsigned int
 :postcondition : écrit dans un fichier de sauvegarde le contenu de chaque structure sur une ligne
 */
-void Sauvegarde(infos personne[], unsigned int indice_personne[], unsigned int cpt_ligne);
+void Sauvegarde(infos personne[], unsigned int cpt_ligne);
 
 /**
 :entrée personne : tableau de structures de type infos
